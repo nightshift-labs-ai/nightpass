@@ -6,3 +6,4 @@ deploy/managed/
 .l8test/
 deploy/midnight-level-db/
 deploy/deployment-*.json
+deploy/gate-e2e-*.json

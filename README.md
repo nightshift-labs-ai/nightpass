@@ -66,7 +66,7 @@ HTTP gate: 402 → 200, replay 403, **chain watcher can't front-run a paid call*
 
 ## HTTP paywall (x402-style) — `src/api-gate.mjs`
 `GET /v1/data` → `402 {nonce}` → the agent runs `redeem(sha256(nonce ‖ claim))` → retries with `X-Nightpass: <nonce>.<nullifier>.<claim>` → `200`.
-Replaying the header gives `403`; an old nullifier can't pay a new nonce; nonces expire (default 2 min) and the pending set is bounded. In production the gate reads `tickets` from the Midnight indexer.
+Replaying the header gives `403`; an old nullifier can't pay a new nonce; nonces expire (default 2 min) and the pending set is bounded. The same gate reads `tickets` from the Midnight indexer in production (verified on a real chain, see below).
 
 ## Deploying to a public network — `deploy/`
 Public Midnight networks run ledger 8, so `deploy/` pins Compact 0.31.1, compact-runtime 0.16.0, Midnight.js 4.1.1 and proof server 8.1.3
@@ -92,6 +92,15 @@ Transcript: [`docs/localnet-run.txt`](docs/localnet-run.txt), block numbers + tx
 To reproduce: start a local network (Midnight's `standalone.yml`: node, indexer, proof server), then
 `cd deploy && MIDNIGHT_NETWORK=undeployed WALLET_SEED=<genesis seed 00…01> node src/deploy.mjs`.
 Note: calls that move unshielded NIGHT (`buy`) need the balancing recipe signed with the unshielded key (`wallet.signRecipe`), otherwise the node rejects the transaction (error 192).
+
+### HTTP paywall paid by real on-chain proofs
+`deploy/src/gate-e2e.mjs` runs `src/api-gate.mjs` with the ledger read **from the Midnight indexer** (not the simulator) and pays
+real HTTP requests with on-chain `redeem` transactions ([`docs/gate-e2e-localnet.json`](docs/gate-e2e-localnet.json)):
+
+| Call | No header | redeem tx | Chain watcher replays the ticket without the claim | Agent with claim | Same header again |
+|---|---|---|---|---|---|
+| 1 | 402 | block 36 | 402 | **200** | 403 |
+| 2 | 402 | block 40 | 402 | **200** | 403 |
 
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from

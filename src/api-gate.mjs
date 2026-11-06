@@ -12,9 +12,11 @@ import { rand32, hex } from "./simulator.mjs";
 export const requestTag = (nonceHex, claim) =>
   new Uint8Array(createHash("sha256").update(Buffer.from(nonceHex, "hex")).update(claim).digest());
 
-export function createGate(sim, { price = "1 credit", ttlMs = 120_000, maxPending = 10_000 } = {}) {
+// `src` is either the local simulator (has a `ledger` getter) or { getLedger: async () => ledger } reading the Midnight indexer
+// (see deploy/src/gate-e2e.mjs, which runs this gate against a real chain).
+export function createGate(src, { price = "1 credit", ttlMs = 120_000, maxPending = 10_000 } = {}) {
   const pending = new Map(); // nonce -> expiry (bounded: oldest dropped first)
-  return http.createServer((req, res) => {
+  return http.createServer(async (req, res) => {
     const send = (code, body) => { res.writeHead(code, { "content-type": "application/json" }); res.end(JSON.stringify(body)); };
     if (!req.url.startsWith("/v1/data")) return send(404, { error: "not found" });
     const now = Date.now();
@@ -27,7 +29,7 @@ export function createGate(sim, { price = "1 credit", ttlMs = 120_000, maxPendin
     const [nonce, nf, claim] = String(h).split(".");
     const exp = pending.get(nonce);
     if (!exp || exp < now) { pending.delete(nonce); return send(403, { error: "unknown, expired or used nonce" }); }
-    const l = sim.ledger; const nfb = Uint8Array.from(Buffer.from(nf ?? "", "hex")); const cb = Buffer.from(claim ?? "", "hex");
+    const l = typeof src.getLedger === "function" ? await src.getLedger() : src.ledger; const nfb = Uint8Array.from(Buffer.from(nf ?? "", "hex")); const cb = Buffer.from(claim ?? "", "hex");
     if (nfb.length !== 32 || cb.length !== 32 || !l.tickets.member(nfb) || hex(l.tickets.lookup(nfb)) !== hex(requestTag(nonce, cb)))
       return send(402, { error: "no ticket for this nonce and claim" });
     pending.delete(nonce);

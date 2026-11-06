@@ -1,0 +1,26 @@
+{
+  "network": "undeployed",
+  "address": "3f48c452b3c4101d9fe6f887de53a512c4d313bc7d26e286b84df2d618bd1053",
+  "issueBlock": "32",
+  "results": [
+    {
+      "call": 0,
+      "first": 402,
+      "redeemBlock": "36",
+      "redeemTx": "004cc677d491c5876add46d73375fa1ccc4ce8917f3c03acad2941cf145f4b04bc",
+      "thiefWithoutClaim": 402,
+      "paid": 200,
+      "replay": 403
+    },
+    {
+      "call": 1,
+      "first": 402,
+      "redeemBlock": "40",
+      "redeemTx": "00d80f36f38555c2b4134b190539c376a23386e645c5bceaf7cbd6db67e6f303cb",
+      "thiefWithoutClaim": 402,
+      "paid": 200,
+      "replay": 403
+    }
+  ],
+  "at": "2026-11-06T02:06:44.624Z"
+}
