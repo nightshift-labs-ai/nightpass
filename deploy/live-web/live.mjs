@@ -9,7 +9,7 @@ const CONTRACTS = [
   { title: "Contract A — full credit flow", address: deployment.address,
     note: "issue → redeem → double spend (rejected in-circuit) → redeem → self-serve buy() paying NIGHT → operator withdraw()." },
   { title: "Contract B — HTTP 402 paywall", address: gate.address,
-    note: "An API server reads this ledger from the indexer: 402 → agent redeems on chain → 200; thief without the claim 402; replay 403." },
+    note: "An API server reads this ledger from the indexer: 402 → agent redeems on chain → 200 (two concurrent copies → one 200 + 409); thief without the claim 402; replay 403." },
 ];
 const hex = (u8) => [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
 const fromHex = (h) => new Uint8Array(h.match(/../g).map((x) => parseInt(x, 16)));
@@ -49,8 +49,8 @@ const steps = () => `<section class="wide"><h2>Transactions of contract A (recor
   <table><tr><th>step</th><th>block</th><th>tx / result</th></tr>${deployment.steps.filter((s) => !("balance" in s)).map((s) => `<tr><td>${esc(s.step)}</td>
   <td>${s.block ?? ""}</td><td>${s.txId ? `<code>${s.txId}</code>` : `<span class="${/rejected/.test(s.result) ? "ok" : ""}">${esc(s.result ?? s.balance ?? "")}</span>`}</td></tr>`).join("")}</table>
   <h2 style="margin-top:14px">HTTP paywall run on contract B (deploy/src/gate-e2e.mjs)</h2>
-  <table><tr><th>call</th><th>no ticket</th><th>redeem block</th><th>paid</th><th>thief w/o claim</th><th>replay</th></tr>${gate.results.map((r) =>
-  `<tr><td>${r.call}</td><td class="bad">${r.first}</td><td>${r.redeemBlock}</td><td class="ok">${r.paid}</td><td class="bad">${r.thiefWithoutClaim}</td><td class="bad">${r.replay}</td></tr>`).join("")}</table></section>`;
+  <table><tr><th>call</th><th>no ticket</th><th>redeem block</th><th>paid</th><th>concurrent copies</th><th>thief w/o claim</th><th>replay</th></tr>${gate.results.map((r) =>
+  `<tr><td>${r.call}</td><td class="bad">${r.first}</td><td>${r.redeemBlock}</td><td class="ok">${r.paid}</td><td>${(r.concurrentCopies ?? []).join(" + ")}</td><td class="bad">${r.thiefWithoutClaim}</td><td class="bad">${r.replay}</td></tr>`).join("")}</table></section>`;
 
 const checker = () => `<section class="wide"><h2>Check a nullifier yourself</h2>
   <p class="sub">Paste a 32-byte hex nullifier. The answer comes from the live ledger of contract A or B (Set.member) — this is exactly the check the API runs.</p>

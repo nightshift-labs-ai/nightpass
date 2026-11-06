@@ -158,12 +158,16 @@ real HTTP requests with on-chain `redeem` transactions ([`docs/gate-e2e-localnet
 | 1 | 402 | block 36 | 402 | **200** | 403 |
 | 2 | 402 | block 40 | 402 | **200** | 403 |
 
-Same test on the **public preview network** (contract `402c9059ec4baf3daae5a79301f6d838866c97af17a2c1744e4b23c57c5c8150`, [`docs/gate-e2e-preview.json`](docs/gate-e2e-preview.json)):
+Same test on the **public preview network**, re-run with the current gate (stateless nonces + in-flight lock), contract
+`6ba4029d45b263fb55b7f1f6ba7f7b123c43a51f16a1f34b4f71e1f2cc2f77eb` ([`docs/gate-e2e-preview.json`](docs/gate-e2e-preview.json)); two copies of the paid
+header are sent **at the same time**:
 
-| Call | No header | redeem tx | Replay without claim | Agent with claim | Same header again |
+| Call | No header | redeem tx | Replay without claim | Two concurrent copies with claim | Same header again |
 |---|---|---|---|---|---|
-| 1 | 402 | block 1618162 | 402 | **200** | 403 |
-| 2 | 402 | block 1618167 | 402 | **200** | 403 |
+| 1 | 402 | block 1618490 | 402 | **200** + 409 | 403 |
+| 2 | 402 | block 1618494 | 402 | **200** + 409 | 403 |
+
+(An earlier run with the previous gate version, contract `402c9059…8150`, blocks 1618162/1618167, gave the same 402/200/403 results.)
 
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from
@@ -176,6 +180,11 @@ Same test on the **public preview network** (contract `402c9059ec4baf3daae5a7930
 - The tree has 2^16 leaves; when it is full, a new contract must be deployed (bundles in the old one stay spendable).
 - Use a **fresh random secret per bundle** (the wallet code does): nullifiers are `H(secret, i)`, so two bundles bought with the same secret share nullifiers and the second one's credits are already spent.
 - `buy()` uses an unshielded NIGHT payment, so the purchase itself is public (who bought how many); unlinkability starts after it. Roadmap: shielded payment.
+
+## Adoption
+First adopter: our own live x402 API (https://nightshift-x402.nightshift-labs.workers.dev, 18 paid endpoints at $0.003–0.01 per call, listed on x402scan).
+Plan: sell 100- and 1,000-call Nightpass bundles at the same per-call price next to the x402 per-call option; agents that want unlinkable usage pick the bundle.
+Providers keep the whole bundle price; a hosted verifier (indexer read + gate) is an optional paid service.
 
 ## Roadmap
 1. Browser UI with Lace wallet against the preview deployment.

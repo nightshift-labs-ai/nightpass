@@ -86,9 +86,11 @@ for (let k = 0; k < 2; k++) {
   const nf = red.private.result;
   await waitTicket(nf);
   const thief = await fetch(url, { headers: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(new Uint8Array(32))}` } });
-  const r2 = await fetch(url, { headers: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(claim)}` } });
+  const hdr = { "x-nightpass": `${nonce}.${hex(nf)}.${hex(claim)}` };
+  const conc = (await Promise.all([fetch(url, { headers: hdr }), fetch(url, { headers: hdr })])).map((r) => r.status);
+  const r2 = { status: conc.filter((c) => c === 200).length === 1 ? 200 : `BAD ${conc}` };
   const r3 = await fetch(url, { headers: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(claim)}` } });
-  const row = { call: k, first: r1.status, redeemBlock: String(red.public.blockHeight), redeemTx: red.public.txId, thiefWithoutClaim: thief.status, paid: r2.status, replay: r3.status };
+  const row = { call: k, first: r1.status, redeemBlock: String(red.public.blockHeight), redeemTx: red.public.txId, thiefWithoutClaim: thief.status, paid: r2.status, concurrentCopies: conc, replay: r3.status };
   console.log(JSON.stringify(row)); results.push(row);
 }
 srv.close();

@@ -49,7 +49,7 @@ img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
 <tr><td><code>redeem</code> credit #1</td><td class="g">block 1618085</td></tr>
 <tr><td><code>buy(ownerTag, 2)</code> paying 2000 NIGHT units</td><td class="g">block 1618089</td></tr>
 <tr><td><code>withdraw(1500)</code> (in-circuit balance check)</td><td class="g">block 1618093</td></tr></table>
-<p class="m" style="font-size:20px">Also on preview (contract 402c90…) and a local chain: HTTP paywall reading the indexer: 402 → on-chain redeem → <span class="g">200</span>; ticket replayed without the claim → 402; replay → 403.<br>Live chain view (decodes the deployed ledger from the public indexer in your browser): nightpass-demo.nightshift-labs.workers.dev/live — contract balance 500 NIGHT units = 2000 bought − 1500 withdrawn.</p></div>
+<p class="m" style="font-size:20px">Also on preview (contract 6ba402…) and a local chain: HTTP paywall reading the indexer: 402 → on-chain redeem → <span class="g">200</span>; two concurrent copies → one 200; ticket replayed without the claim → 402; replay → 403.<br>Live chain view (decodes the deployed ledger from the public indexer in your browser): nightpass-demo.nightshift-labs.workers.dev/live — contract balance 500 NIGHT units = 2000 bought − 1500 withdrawn.</p></div>
 
 <div class="s"><h2>Demo</h2><img src="demo-ui.png"><p class="m" style="font-size:20px">Live: nightpass-demo.nightshift-labs.workers.dev — the compiled contract running in the browser (local Midnight simulator), with three "try to cheat" buttons.</p></div>
 
@@ -57,7 +57,9 @@ img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
 <li><b>Who pays:</b> API providers selling to agents (data, search, on-chain analytics) who want privacy-conscious agent customers.</li>
 <li><b>Why now:</b> agent-to-API payments (x402) are growing; privacy is the missing piece.</li>
 <li><b>Adoption path:</b> drop-in <code>X-Nightpass</code> header next to x402; we run our own paid agent API and will accept Nightpass first.</li>
-<li><b>Model:</b> providers keep 100% of the bundle price; optional hosted verifier.</li></ul></div>
+<li><b>Model:</b> providers keep 100% of the bundle price; optional hosted verifier.</li>
+<li><b>Pilot (ours, live):</b> Nightshift x402 API — 18 paid endpoints at $0.003–0.01 per call, listed on x402scan. Plan: also sell 100- and 1,000-call Nightpass bundles at the same per-call price.</li>
+<li><b>Why a bundle, not per-call x402:</b> one purchase instead of N public payments; each call costs a redeem fee in DUST, not a USDC transfer.</li></ul></div>
 
 <div class="s"><h2>Roadmap &amp; honest limits</h2><ul>
 <li>Next: Lace wallet in the UI so agents can redeem against the live preview contract from the page (read-only live view already shipped).</li>
