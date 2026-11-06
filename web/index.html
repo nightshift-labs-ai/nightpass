@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nightpass — private API credits for AI agents (Midnight)</title>
+<style>
+:root{--bg:#0b0d17;--panel:#141831;--line:#2a3060;--txt:#e6e8ff;--mut:#9aa0c8;--acc:#7c5cff;--ok:#33d17a;--bad:#ff5c7a;--pub:#ffb547}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt)}
+header{padding:22px 28px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:24px}h1 span{color:var(--acc)}
+header p{margin:6px 0 0;color:var(--mut);max-width:900px}
+main{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:18px 28px}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-height:300px}
+h2{margin:0 0 4px;font-size:17px}.tag{font-size:12px;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:middle}
+.priv{background:#7c5cff33;color:#c7b8ff}.pubt{background:#ffb54733;color:var(--pub)}
+.sub{color:var(--mut);font-size:13px;margin:0 0 12px}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer;margin:2px 4px 2px 0}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}button.danger{background:#5a2232;color:#ffc2cf}
+button:disabled{opacity:.5;cursor:default}
+select{background:#0f1226;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px}
+.kv{font:12px/1.5 ui-monospace,Consolas,monospace;background:#0f1226;border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0;word-break:break-all;max-height:220px;overflow:auto}
+.big{font-size:28px;font-weight:700}.row{display:flex;gap:18px;margin:6px 0}.row div small{display:block;color:var(--mut)}
+#log{grid-column:1/-1;min-height:0}#log ol{margin:0;padding-left:20px;font-size:14px}#log li{margin:3px 0}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.pub{color:var(--pub)}footer{padding:8px 28px 24px;color:var(--mut);font-size:13px}
+</style></head><body>
+<header><h1>🌙 Night<span>pass</span></h1>
+<p>An AI agent buys a bundle of API calls once, then pays every call with a zero-knowledge proof on Midnight.
+The API provider learns <b>"this call was paid by a valid, unspent credit"</b> — never which bundle, which buyer, or how many credits are left.
+This page runs the compiled Compact contract in your browser (Midnight local simulator: same circuits and asserts as on-chain).</p></header>
+<main>
+<section><h2>🤖 Agent wallet <span class="tag priv">private state</span></h2><p class="sub">Secrets never leave the agent. Only proofs do.</p>
+ <div><select id="n"><option>3</option><option selected>5</option><option>10</option></select> calls
+ <button id="buy">Buy bundle</button></div>
+ <div class="row"><div><small>credits left</small><span class="big" id="left">0</span></div><div><small>bundles</small><span class="big" id="nb">0</span></div></div>
+ <div class="kv" id="wallet">no bundles yet</div>
+ <p class="sub">Try to cheat (each must fail inside the ZK circuit):</p>
+ <button class="danger" id="dbl">Re-spend last credit</button><button class="danger" id="infl">Claim 100 uses</button><button class="danger" id="fake">Spend unpaid bundle</button>
+</section>
+<section><h2>🛰️ Paid API <span class="tag pubt">sees public data only</span></h2><p class="sub">Each request gets a fresh nonce; the call is served only if the ledger shows a ticket for it.</p>
+ <button id="call">Call <code>/v1/screen-wallet</code></button>
+ <div class="kv" id="api">idle</div>
+ <div class="row"><div><small>served</small><span class="big ok" id="served">0</span></div><div><small>refused</small><span class="big bad" id="refused">0</span></div></div>
+</section>
+<section><h2>⛓️ Public ledger <span class="tag pubt">what everyone sees</span></h2><p class="sub">Bundle commitments (hiding) · nullifiers · request tickets.</p>
+ <div class="row"><div><small>bundles issued</small><span class="big pub" id="bi">0</span></div><div><small>credits redeemed</small><span class="big pub" id="cr">0</span></div></div>
+ <div class="kv" id="ledger"></div>
+ <p class="sub">Can you tell which nullifier belongs to which bundle? Neither can the API.</p>
+</section>
+<section id="log"><h2>Event log</h2><ol id="events"></ol></section>
+</main>
+<footer>Nightpass · Apache-2.0 · Built on Midnight (Compact 0.36, compact-runtime 0.21). Written by an AI agent for a human entrant.</footer>
+<script type="module" src="./ui.mjs"></script>
+</body></html>

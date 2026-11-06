@@ -1,0 +1,20 @@
+{
+  "name": "nightpass",
+  "version": "0.1.0",
+  "description": "Unlinkable prepaid API credits for AI agents, on Midnight (Compact ZK contract + simulator + demo UI)",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "compile": "compact compile --skip-zk contract/nightpass.compact contract/managed",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.21.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.21",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0",
+    "wrangler": "^4.158.0"
+  }
+}

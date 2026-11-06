@@ -1,0 +1,71 @@
+// Nightpass: unlinkable prepaid API credits for AI agents on Midnight.
+// SPDX-License-Identifier: Apache-2.0
+//
+// An agent buys a bundle of N API calls. The operator records only a hiding
+// commitment to the bundle in a Merkle tree. Each later API call is paid by a
+// zero-knowledge "redeem" that proves: "I own some unspent use of some bundle in
+// the tree" — without revealing which bundle, which buyer, or how many uses are
+// left. A per-use nullifier stops double spending. The API operator sees that a
+// call was paid, never who paid.
+pragma language_version >= 0.16;
+import CompactStandardLibrary;
+
+// ---------- public ledger state (visible on-chain) ----------
+export sealed ledger operator: Bytes<32>;            // operator's app-specific public key
+export ledger bundles: HistoricMerkleTree<16, Bytes<32>>; // bundle commitments (hiding)
+export ledger spent: Set<Bytes<32>>;                 // nullifiers of used credits
+export ledger tickets: Map<Bytes<32>, Bytes<32>>;    // nullifier -> request tag it paid for
+export ledger bundlesIssued: Counter;
+export ledger creditsRedeemed: Counter;
+
+// A bundle lives only in the agent's private state.
+export struct Bundle {
+  secret: Bytes<32>;
+  uses: Uint<16>;
+}
+
+// ---------- private state (witnesses, supplied locally, never on-chain) ----------
+witness localSecret(): Bytes<32>;                       // operator key material
+witness bundle(): Bundle;                               // which bundle the agent spends
+witness bundlePath(): MerkleTreePath<16, Bytes<32>>;    // its Merkle path
+witness useIndex(): Uint<16>;                           // which of its N uses
+
+constructor() {
+  operator = disclose(publicKey(localSecret()));
+}
+
+// Operator records a paid bundle. Only the commitment becomes public.
+export circuit issue(commitment: Bytes<32>): [] {
+  assert(publicKey(localSecret()) == operator, "Only the operator can issue bundles");
+  bundles.insert(disclose(commitment));
+  bundlesIssued.increment(1);
+}
+
+// Agent spends one credit for one API request, anonymously.
+export circuit redeem(requestTag: Bytes<32>): Bytes<32> {
+  const b = bundle();
+  const path = bundlePath();
+  const i = useIndex();
+  assert(path.leaf == bundleCommitment(b), "Path does not belong to this bundle");
+  assert(bundles.checkRoot(disclose(merkleTreePathRoot<16, Bytes<32>>(path))), "Bundle is not in the tree");
+  assert(i < b.uses, "Use index out of range for this bundle");
+  const nf = disclose(nullifier(b.secret, i));
+  assert(!spent.member(nf), "This credit was already spent");
+  spent.insert(nf);
+  tickets.insert(nf, disclose(requestTag));
+  creditsRedeemed.increment(1);
+  return nf;
+}
+
+// Pure helpers, also exported so the TypeScript side computes identical values.
+export pure circuit bundleCommitment(b: Bundle): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "nightpass:bundle"), persistentHash<Bundle>(b)]);
+}
+
+export pure circuit nullifier(secret: Bytes<32>, i: Uint<16>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "nightpass:nullifier"), secret, persistentHash<Uint<16>>(i)]);
+}
+
+export pure circuit publicKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "nightpass:operator"), sk]);
+}

@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@page{size:1280px 720px;margin:0}body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;color:#e6e8ff}
+.s{width:1280px;height:720px;box-sizing:border-box;padding:64px 80px;background:linear-gradient(135deg,#0b0d17,#1a1440);page-break-after:always;position:relative;overflow:hidden}
+h1{font-size:64px;margin:0 0 12px}h1 b{color:#7c5cff}h2{font-size:42px;margin:0 0 28px;color:#c7b8ff}
+p,li{font-size:26px;line-height:1.45}li{margin:8px 0}.m{color:#9aa0c8}.k{color:#ffb547}.g{color:#33d17a}
+table{border-collapse:collapse;font-size:22px;width:100%}td,th{border:1px solid #2a3060;padding:12px 16px;text-align:left}th{background:#141831}
+code{font-family:ui-monospace,Consolas,monospace;color:#ffb547}.f{position:absolute;bottom:26px;left:80px;font-size:16px;color:#6b70a0}
+img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
+</style></head><body>
+<div class="s"><h1>Night<b>pass</b></h1><p style="font-size:34px">Unlinkable prepaid API credits for AI agents — on Midnight</p>
+<p class="m">Pay for every API call with a zero-knowledge proof.<br>The provider learns <span class="k">"paid by a valid, unspent credit"</span> — never <i>who</i>.</p>
+<p class="m" style="margin-top:80px">Midnight Buildathon · Wave 3 · Track: Build Privacy-First Apps</p><div class="f">Nightshift Labs · Apache-2.0</div></div>
+
+<div class="s"><h2>The problem</h2><ul>
+<li>AI agents now pay per API call (x402 micropayments, API keys tied to wallets).</li>
+<li>Every paid call is <span class="k">linkable</span>: which agent, which endpoint, how often, when.</li>
+<li>For an agent, that log <i>is</i> its strategy: trading signals, research targets, customers.</li>
+<li>Today the only options are: trust the provider, or don't use paid APIs.</li></ul></div>
+
+<div class="s"><h2>The idea</h2><ul>
+<li><b>Buy once:</b> the agent buys a bundle of <i>N</i> calls; the chain stores only a hiding commitment <code>H(secret, N)</code>.</li>
+<li><b>Spend anonymously:</b> each call = one ZK <code>redeem()</code> proving "I own an unspent use of <i>some</i> bundle in the tree".</li>
+<li><b>No double spend:</b> a per-use nullifier <code>H(secret, i)</code> goes into a public set.</li>
+<li><b>Bound to the request:</b> the API's nonce is recorded next to the nullifier → the server serves only paid requests.</li></ul></div>
+
+<div class="s"><h2>Dual-ledger design</h2><table>
+<tr><th></th><th>Public ledger (on-chain)</th><th>Private state (agent only)</th></tr>
+<tr><td>Bundle</td><td>commitment in <code>HistoricMerkleTree&lt;16&gt;</code></td><td>secret, N, next index</td></tr>
+<tr><td>Spend</td><td>nullifier in <code>Set</code>, nullifier → request tag in <code>Map</code></td><td>which bundle, which use, Merkle path</td></tr>
+<tr><td>Counters</td><td><code>bundlesIssued</code>, <code>creditsRedeemed</code></td><td>credits left</td></tr>
+<tr><td>Operator</td><td>hash of the operator key (sealed)</td><td>operator secret</td></tr></table>
+<p class="m">Witnesses: <code>bundle()</code>, <code>bundlePath()</code>, <code>useIndex()</code>, <code>localSecret()</code>. Historic roots keep old bundles spendable.</p></div>
+
+<div class="s"><h2>What the circuit enforces</h2><ul>
+<li class="g">✔ path leaf = <code>bundleCommitment(bundle)</code> → N cannot be inflated</li>
+<li class="g">✔ root is a current or past root of the tree → only paid bundles</li>
+<li class="g">✔ <code>useIndex &lt; N</code> → exactly N spends</li>
+<li class="g">✔ nullifier unspent → no replay / double spend</li>
+<li class="g">✔ only the operator can <code>issue()</code></li></ul>
+<p class="m">10 simulator tests cover each rule plus unlinkability and request binding — all passing. Contract compiles with real ZK keys.</p></div>
+
+<div class="s"><h2>Demo</h2><img src="demo-ui.png"><p class="m" style="font-size:20px">Live: nightpass-demo.nightshift-labs.workers.dev — the compiled contract running in the browser (local Midnight simulator), with three "try to cheat" buttons.</p></div>
+
+<div class="s"><h2>Market &amp; adoption</h2><ul>
+<li><b>Who pays:</b> API providers selling to agents (data, search, on-chain analytics) who want privacy-conscious agent customers.</li>
+<li><b>Why now:</b> agent-to-API payments (x402) are growing; privacy is the missing piece.</li>
+<li><b>Adoption path:</b> drop-in <code>X-Nightpass</code> header next to x402; we run our own paid agent API and will accept Nightpass first.</li>
+<li><b>Model:</b> providers keep 100% of the bundle price; optional hosted verifier.</li></ul></div>
+
+<div class="s"><h2>Roadmap &amp; honest limits</h2><ul>
+<li>Next: Midnight testnet deploy + Lace wallet in the UI.</li>
+<li>Shielded payment inside the purchase, so buying is private too.</li>
+<li>x402 integration: verify the nullifier via the indexer in the API middleware.</li>
+<li>Bundle expiry, per-endpoint credit classes.</li>
+<li class="m">Limits: the operator knows who bought which commitment; unlinkability starts after purchase. Anonymity set = bundles issued before the proven root.</li></ul>
+<div class="f">Built by an AI agent (Claude) for Nightshift Labs · Apache-2.0 · Compact 0.36 · compact-runtime 0.21</div></div>
+</body></html>
