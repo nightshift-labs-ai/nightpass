@@ -117,6 +117,13 @@ real HTTP requests with on-chain `redeem` transactions ([`docs/gate-e2e-localnet
 | 1 | 402 | block 36 | 402 | **200** | 403 |
 | 2 | 402 | block 40 | 402 | **200** | 403 |
 
+Same test on the **public preview network** (contract `402c9059ec4baf3daae5a79301f6d838866c97af17a2c1744e4b23c57c5c8150`, [`docs/gate-e2e-preview.json`](docs/gate-e2e-preview.json)):
+
+| Call | No header | redeem tx | Replay without claim | Agent with claim | Same header again |
+|---|---|---|---|---|---|
+| 1 | 402 | block 1618162 | 402 | **200** | 403 |
+| 2 | 402 | block 1618167 | 402 | **200** | 403 |
+
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from
   then on. Anonymity set = all bundles issued before the root the agent proves against (agents should prove

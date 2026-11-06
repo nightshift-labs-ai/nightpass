@@ -1,0 +1,26 @@
+{
+  "network": "preview",
+  "address": "402c9059ec4baf3daae5a79301f6d838866c97af17a2c1744e4b23c57c5c8150",
+  "issueBlock": "1618157",
+  "results": [
+    {
+      "call": 0,
+      "first": 402,
+      "redeemBlock": "1618162",
+      "redeemTx": "00cdf99177b1d83abb8478efc412f856c5dfe9f8c9f35b2de4aba8214c77e21d60",
+      "thiefWithoutClaim": 402,
+      "paid": 200,
+      "replay": 403
+    },
+    {
+      "call": 1,
+      "first": 402,
+      "redeemBlock": "1618167",
+      "redeemTx": "0010bda5fb862002afdfb32b9252880ed60440b1a06a5306c782fa4d72a7266fcb",
+      "thiefWithoutClaim": 402,
+      "paid": 200,
+      "replay": 403
+    }
+  ],
+  "at": "2026-11-06T02:20:02.538Z"
+}
