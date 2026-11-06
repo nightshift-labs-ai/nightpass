@@ -37,7 +37,7 @@ Requires Node 22 and the Compact toolchain (compiler 0.36.0).
 ```bash
 npm install
 compact compile contract/nightpass.compact contract/managed     # real ZK keys (~10 s); add --skip-zk for fast iteration
-npm test                                                        # 10 simulator tests
+npm test                                                        # 11 tests (10 contract + 1 HTTP paywall)
 node src/demo.mjs                                               # end-to-end story in the local simulator
 npx vite --config vite.config.mjs                               # browser demo (web/) on localhost
 node tools/uitest.mjs <url>                                     # headless UI test (Playwright)
@@ -47,6 +47,15 @@ node tools/uitest.mjs <url>                                     # headless UI te
 operator-only issuance · exactly N spends per N-use bundle · double-spend rejected · unpaid bundle rejected ·
 inflated N rejected (commitment binding) · forged Merkle path rejected · nullifiers unlinkable to commitments ·
 request-tag verification · old bundles stay spendable after new issuances (historic roots).
+
+## HTTP paywall (x402-style) — `src/api-gate.mjs`
+`GET /v1/data` → `402 {nonce}` → the agent runs `redeem(nonce)` → retries with `X-Nightpass: <nonce>.<nullifier>` → `200`.
+Replaying the header gives `403`; an old nullifier can't pay a new nonce. In production the gate reads `tickets` from the Midnight indexer.
+
+## Deploying to a public network — `deploy/`
+Public Midnight networks run ledger 8, so `deploy/` pins Compact 0.31.1, compact-runtime 0.16.0, Midnight.js 4.1.1 and proof server 8.1.3
+(the root project uses the newest compiler, 0.36, for local tests). `deploy/src/deploy.mjs` syncs a wallet, registers NIGHT for DUST,
+deploys to `preview`, then runs one `issue` and one `redeem` on-chain.
 
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from
