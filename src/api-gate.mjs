@@ -1,7 +1,7 @@
-// Minimal HTTP paywall using Nightpass (x402-style flow), against the local simulator ledger.
+// Minimal HTTP paywall using Punchcard (x402-style flow), against the local simulator ledger.
 //   GET /v1/data → 402 + {nonce}   (payment required, fresh nonce, expires after ttlMs)
 //   Agent picks a random 32-byte `claim` secret, redeems one credit with requestTag = sha256(nonce ‖ claim),
-//   then retries with header  X-Nightpass: <nonceHex>.<nullifierHex>.<claimHex>  → 200 if tickets[nullifier] == sha256(nonce ‖ claim).
+//   then retries with header  X-Punchcard: <nonceHex>.<nullifierHex>.<claimHex>  → 200 if tickets[nullifier] == sha256(nonce ‖ claim).
 // Why the claim secret: tickets[nullifier] is PUBLIC on-chain. If the tag were just the nonce, anyone watching the chain could
 // replay "<nonce>.<nullifier>" before the agent and take the response it paid for. The chain only shows the hash; the claim
 // travels once, over TLS, to the API. In production the ledger read goes to the Midnight indexer instead of the simulator.
@@ -31,8 +31,8 @@ export function createGate(src, { price = "1 credit", ttlMs = 600_000, key = ran
     const send = (code, body) => { res.writeHead(code, { "content-type": "application/json" }); res.end(JSON.stringify(body)); };
     if (!req.url.startsWith("/v1/data")) return send(404, { error: "not found" });
     const now = Date.now();
-    const h = req.headers["x-nightpass"];
-    if (!h) return send(402, { error: "payment required", scheme: "nightpass", price, nonce: newNonce(now), expiresInMs: ttlMs, tag: "sha256(nonce || claim)" });
+    const h = req.headers["x-punchcard"];
+    if (!h) return send(402, { error: "payment required", scheme: "punchcard", price, nonce: newNonce(now), expiresInMs: ttlMs, tag: "sha256(nonce || claim)" });
     const [nonce, nf, claim] = String(h).split(".");
     const exp = nonceExpiry(nonce);
     if (!exp || exp < now || used.has(nonce)) return send(403, { error: "unknown, expired or used nonce" });

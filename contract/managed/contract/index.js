@@ -230,21 +230,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.callContext.currentQueryContext != undefined)) {
           __compactRuntime.typeError('issue',
                                      'argument 1 (as invoked from Typescript)',
-                                     'nightpass.compact line 43 char 1',
+                                     'punchcard.compact line 43 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(owner_0.buffer instanceof ArrayBuffer && owner_0.BYTES_PER_ELEMENT === 1 && owner_0.length === 32)) {
           __compactRuntime.typeError('issue',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'nightpass.compact line 43 char 1',
+                                     'punchcard.compact line 43 char 1',
                                      'Bytes<32>',
                                      owner_0)
         }
         if (!(typeof(uses_0) === 'bigint' && uses_0 >= 0n && uses_0 <= 65535n)) {
           __compactRuntime.typeError('issue',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'nightpass.compact line 43 char 1',
+                                     'punchcard.compact line 43 char 1',
                                      'Uint<0..65536>',
                                      uses_0)
         }
@@ -276,21 +276,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.callContext.currentQueryContext != undefined)) {
           __compactRuntime.typeError('buy',
                                      'argument 1 (as invoked from Typescript)',
-                                     'nightpass.compact line 52 char 1',
+                                     'punchcard.compact line 52 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(owner_0.buffer instanceof ArrayBuffer && owner_0.BYTES_PER_ELEMENT === 1 && owner_0.length === 32)) {
           __compactRuntime.typeError('buy',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'nightpass.compact line 52 char 1',
+                                     'punchcard.compact line 52 char 1',
                                      'Bytes<32>',
                                      owner_0)
         }
         if (!(typeof(uses_0) === 'bigint' && uses_0 >= 0n && uses_0 <= 65535n)) {
           __compactRuntime.typeError('buy',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'nightpass.compact line 52 char 1',
+                                     'punchcard.compact line 52 char 1',
                                      'Uint<0..65536>',
                                      uses_0)
         }
@@ -322,21 +322,21 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.callContext.currentQueryContext != undefined)) {
           __compactRuntime.typeError('withdraw',
                                      'argument 1 (as invoked from Typescript)',
-                                     'nightpass.compact line 60 char 1',
+                                     'punchcard.compact line 60 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(typeof(amount_0) === 'bigint' && amount_0 >= 0n && amount_0 <= 340282366920938463463374607431768211455n)) {
           __compactRuntime.typeError('withdraw',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'nightpass.compact line 60 char 1',
+                                     'punchcard.compact line 60 char 1',
                                      'Uint<0..340282366920938463463374607431768211456>',
                                      amount_0)
         }
         if (!(typeof(to_0) === 'object' && to_0.bytes.buffer instanceof ArrayBuffer && to_0.bytes.BYTES_PER_ELEMENT === 1 && to_0.bytes.length === 32)) {
           __compactRuntime.typeError('withdraw',
                                      'argument 2 (argument 3 as invoked from Typescript)',
-                                     'nightpass.compact line 60 char 1',
+                                     'punchcard.compact line 60 char 1',
                                      'struct UserAddress<bytes: Bytes<32>>',
                                      to_0)
         }
@@ -367,14 +367,14 @@ export class Contract {
         if (!(typeof(contextOrig_0) === 'object' && contextOrig_0.callContext.currentQueryContext != undefined)) {
           __compactRuntime.typeError('redeem',
                                      'argument 1 (as invoked from Typescript)',
-                                     'nightpass.compact line 67 char 1',
+                                     'punchcard.compact line 67 char 1',
                                      'CircuitContext',
                                      contextOrig_0)
         }
         if (!(requestTag_0.buffer instanceof ArrayBuffer && requestTag_0.BYTES_PER_ELEMENT === 1 && requestTag_0.length === 32)) {
           __compactRuntime.typeError('redeem',
                                      'argument 1 (argument 2 as invoked from Typescript)',
-                                     'nightpass.compact line 67 char 1',
+                                     'punchcard.compact line 67 char 1',
                                      'Bytes<32>',
                                      requestTag_0)
         }
@@ -445,7 +445,7 @@ export class Contract {
     if (!(typeof(price_0) === 'bigint' && price_0 >= 0n && price_0 <= 18446744073709551615n)) {
       __compactRuntime.typeError('Contract state constructor',
                                  'argument 1 (argument 2 as invoked from Typescript)',
-                                 'nightpass.compact line 34 char 1',
+                                 'punchcard.compact line 34 char 1',
                                  'Uint<0..18446744073709551616>',
                                  price_0)
     }
@@ -849,7 +849,7 @@ export class Contract {
     if (!(result_0.buffer instanceof ArrayBuffer && result_0.BYTES_PER_ELEMENT === 1 && result_0.length === 32)) {
       __compactRuntime.typeError('localSecret',
                                  'return value',
-                                 'nightpass.compact line 29 char 1',
+                                 'punchcard.compact line 29 char 1',
                                  'Bytes<32>',
                                  result_0)
     }
@@ -866,7 +866,7 @@ export class Contract {
     if (!(typeof(result_0) === 'object' && result_0.secret.buffer instanceof ArrayBuffer && result_0.secret.BYTES_PER_ELEMENT === 1 && result_0.secret.length === 32 && typeof(result_0.uses) === 'bigint' && result_0.uses >= 0n && result_0.uses <= 65535n)) {
       __compactRuntime.typeError('bundle',
                                  'return value',
-                                 'nightpass.compact line 30 char 1',
+                                 'punchcard.compact line 30 char 1',
                                  'struct Bundle<secret: Bytes<32>, uses: Uint<0..65536>>',
                                  result_0)
     }
@@ -883,7 +883,7 @@ export class Contract {
     if (!(typeof(result_0) === 'object' && result_0.leaf.buffer instanceof ArrayBuffer && result_0.leaf.BYTES_PER_ELEMENT === 1 && result_0.leaf.length === 32 && Array.isArray(result_0.path) && result_0.path.length === 16 && result_0.path.every((t) => typeof(t) === 'object' && typeof(t.sibling) === 'object' && typeof(t.sibling.field) === 'bigint' && t.sibling.field >= 0 && t.sibling.field <= __compactRuntime.MAX_FIELD && typeof(t.goes_left) === 'boolean'))) {
       __compactRuntime.typeError('bundlePath',
                                  'return value',
-                                 'nightpass.compact line 31 char 1',
+                                 'punchcard.compact line 31 char 1',
                                  'struct MerkleTreePath<leaf: Bytes<32>, path: Vector<16, struct MerkleTreePathEntry<sibling: struct MerkleTreeDigest<field: Field>, goes_left: Boolean>>>',
                                  result_0)
     }
@@ -900,7 +900,7 @@ export class Contract {
     if (!(typeof(result_0) === 'bigint' && result_0 >= 0n && result_0 <= 65535n)) {
       __compactRuntime.typeError('useIndex',
                                  'return value',
-                                 'nightpass.compact line 32 char 1',
+                                 'punchcard.compact line 32 char 1',
                                  'Uint<0..65536>',
                                  result_0)
     }
@@ -1332,7 +1332,7 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(rt_0) === 'object' && typeof(rt_0.field) === 'bigint' && rt_0.field >= 0 && rt_0.field <= __compactRuntime.MAX_FIELD)) {
           __compactRuntime.typeError('checkRoot',
                                      'argument 1',
-                                     'nightpass.compact line 15 char 1',
+                                     'punchcard.compact line 15 char 1',
                                      'struct MerkleTreeDigest<field: Field>',
                                      rt_0)
         }
@@ -1382,14 +1382,14 @@ export function ledger(stateOrChargedState) {
         if (!(typeof(index_0) === 'bigint' && index_0 >= 0 && index_0 <= __compactRuntime.MAX_FIELD)) {
           __compactRuntime.typeError('path_for_leaf',
                                      'argument 1',
-                                     'nightpass.compact line 15 char 1',
+                                     'punchcard.compact line 15 char 1',
                                      'Field',
                                      index_0)
         }
         if (!(leaf_0.buffer instanceof ArrayBuffer && leaf_0.BYTES_PER_ELEMENT === 1 && leaf_0.length === 32)) {
           __compactRuntime.typeError('path_for_leaf',
                                      'argument 2',
-                                     'nightpass.compact line 15 char 1',
+                                     'punchcard.compact line 15 char 1',
                                      'Bytes<32>',
                                      leaf_0)
         }
@@ -1404,7 +1404,7 @@ export function ledger(stateOrChargedState) {
         if (!(leaf_0.buffer instanceof ArrayBuffer && leaf_0.BYTES_PER_ELEMENT === 1 && leaf_0.length === 32)) {
           __compactRuntime.typeError('find_path_for_leaf',
                                      'argument 1',
-                                     'nightpass.compact line 15 char 1',
+                                     'punchcard.compact line 15 char 1',
                                      'Bytes<32>',
                                      leaf_0)
         }
@@ -1468,7 +1468,7 @@ export function ledger(stateOrChargedState) {
         if (!(elem_0.buffer instanceof ArrayBuffer && elem_0.BYTES_PER_ELEMENT === 1 && elem_0.length === 32)) {
           __compactRuntime.typeError('member',
                                      'argument 1',
-                                     'nightpass.compact line 16 char 1',
+                                     'punchcard.compact line 16 char 1',
                                      'Bytes<32>',
                                      elem_0)
         }
@@ -1546,7 +1546,7 @@ export function ledger(stateOrChargedState) {
         if (!(key_0.buffer instanceof ArrayBuffer && key_0.BYTES_PER_ELEMENT === 1 && key_0.length === 32)) {
           __compactRuntime.typeError('member',
                                      'argument 1',
-                                     'nightpass.compact line 17 char 1',
+                                     'punchcard.compact line 17 char 1',
                                      'Bytes<32>',
                                      key_0)
         }
@@ -1575,7 +1575,7 @@ export function ledger(stateOrChargedState) {
         if (!(key_0.buffer instanceof ArrayBuffer && key_0.BYTES_PER_ELEMENT === 1 && key_0.length === 32)) {
           __compactRuntime.typeError('lookup',
                                      'argument 1',
-                                     'nightpass.compact line 17 char 1',
+                                     'punchcard.compact line 17 char 1',
                                      'Bytes<32>',
                                      key_0)
         }
@@ -1668,7 +1668,7 @@ export const pureCircuits = {
     if (!(secret_0.buffer instanceof ArrayBuffer && secret_0.BYTES_PER_ELEMENT === 1 && secret_0.length === 32)) {
       __compactRuntime.typeError('ownerTag',
                                  'argument 1',
-                                 'nightpass.compact line 83 char 1',
+                                 'punchcard.compact line 84 char 1',
                                  'Bytes<32>',
                                  secret_0)
     }
@@ -1683,14 +1683,14 @@ export const pureCircuits = {
     if (!(owner_0.buffer instanceof ArrayBuffer && owner_0.BYTES_PER_ELEMENT === 1 && owner_0.length === 32)) {
       __compactRuntime.typeError('commitmentOf',
                                  'argument 1',
-                                 'nightpass.compact line 87 char 1',
+                                 'punchcard.compact line 88 char 1',
                                  'Bytes<32>',
                                  owner_0)
     }
     if (!(typeof(uses_0) === 'bigint' && uses_0 >= 0n && uses_0 <= 65535n)) {
       __compactRuntime.typeError('commitmentOf',
                                  'argument 2',
-                                 'nightpass.compact line 87 char 1',
+                                 'punchcard.compact line 88 char 1',
                                  'Uint<0..65536>',
                                  uses_0)
     }
@@ -1704,7 +1704,7 @@ export const pureCircuits = {
     if (!(typeof(b_0) === 'object' && b_0.secret.buffer instanceof ArrayBuffer && b_0.secret.BYTES_PER_ELEMENT === 1 && b_0.secret.length === 32 && typeof(b_0.uses) === 'bigint' && b_0.uses >= 0n && b_0.uses <= 65535n)) {
       __compactRuntime.typeError('bundleCommitment',
                                  'argument 1',
-                                 'nightpass.compact line 91 char 1',
+                                 'punchcard.compact line 92 char 1',
                                  'struct Bundle<secret: Bytes<32>, uses: Uint<0..65536>>',
                                  b_0)
     }
@@ -1719,14 +1719,14 @@ export const pureCircuits = {
     if (!(secret_0.buffer instanceof ArrayBuffer && secret_0.BYTES_PER_ELEMENT === 1 && secret_0.length === 32)) {
       __compactRuntime.typeError('nullifier',
                                  'argument 1',
-                                 'nightpass.compact line 95 char 1',
+                                 'punchcard.compact line 96 char 1',
                                  'Bytes<32>',
                                  secret_0)
     }
     if (!(typeof(i_0) === 'bigint' && i_0 >= 0n && i_0 <= 65535n)) {
       __compactRuntime.typeError('nullifier',
                                  'argument 2',
-                                 'nightpass.compact line 95 char 1',
+                                 'punchcard.compact line 96 char 1',
                                  'Uint<0..65536>',
                                  i_0)
     }
@@ -1740,7 +1740,7 @@ export const pureCircuits = {
     if (!(sk_0.buffer instanceof ArrayBuffer && sk_0.BYTES_PER_ELEMENT === 1 && sk_0.length === 32)) {
       __compactRuntime.typeError('publicKey',
                                  'argument 1',
-                                 'nightpass.compact line 99 char 1',
+                                 'punchcard.compact line 100 char 1',
                                  'Bytes<32>',
                                  sk_0)
     }

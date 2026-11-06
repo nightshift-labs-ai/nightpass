@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { NightpassSim, AgentWallet, hex, rand32 } from "../src/simulator.mjs";
+import { PunchcardSim, AgentWallet, hex, rand32 } from "../src/simulator.mjs";
 import { createGate, requestTag } from "../src/api-gate.mjs";
 
 async function withGate(fn, opts) {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const agent = new AgentWallet();
   await sim.issue(agent.newBundle(3));
   const src = opts?.slowLedger ? { getLedger: () => new Promise((r) => setTimeout(() => r(sim.ledger), opts.slowLedger)) } : sim;
@@ -15,7 +15,7 @@ const paidCall = async (agent, sim, url) => {
   const { nonce } = await (await fetch(url)).json();
   const claim = rand32();
   const nf = await agent.pay(sim, requestTag(nonce, claim));
-  return { nonce, nf, claim, hdr: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(claim)}` } };
+  return { nonce, nf, claim, hdr: { "x-punchcard": `${nonce}.${hex(nf)}.${hex(claim)}` } };
 };
 
 test("HTTP gate: 402 → anonymous redeem → 200; replayed header → 403; old nullifier can't pay a new nonce", () => withGate(async ({ sim, agent, url }) => {
@@ -24,7 +24,7 @@ test("HTTP gate: 402 → anonymous redeem → 200; replayed header → 403; old 
   assert.equal((await fetch(url, { headers: hdr })).status, 200);
   assert.equal((await fetch(url, { headers: hdr })).status, 403);
   const { nonce: n2 } = await (await fetch(url)).json();
-  assert.equal((await fetch(url, { headers: { "x-nightpass": `${n2}.${hex(nf)}.${hex(claim)}` } })).status, 402);
+  assert.equal((await fetch(url, { headers: { "x-punchcard": `${n2}.${hex(nf)}.${hex(claim)}` } })).status, 402);
 }));
 
 test("HTTP gate: a chain watcher cannot front-run the paid call (it sees only sha256(nonce‖claim))", () => withGate(async ({ sim, agent, url }) => {
@@ -32,7 +32,7 @@ test("HTTP gate: a chain watcher cannot front-run the paid call (it sees only sh
   // attacker reads the public ledger: nullifier + ticket hash, and knows the nonce (e.g. sniffed 402); it lacks the claim
   const ticket = sim.ledger.tickets.lookup(nf);
   for (const guess of [ticket, new Uint8Array(32), rand32()])
-    assert.equal((await fetch(url, { headers: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(guess)}` } })).status, 402);
+    assert.equal((await fetch(url, { headers: { "x-punchcard": `${nonce}.${hex(nf)}.${hex(guess)}` } })).status, 402);
   assert.equal((await fetch(url, { headers: hdr })).status, 200, "the real agent still gets its response");
 }));
 
@@ -52,7 +52,7 @@ test("HTTP gate: a flood of unpaid requests cannot evict a nonce the agent is pa
   const { nonce } = await (await fetch(url)).json();
   await Promise.all(Array.from({ length: 300 }, () => fetch(url).then((r) => r.arrayBuffer())));
   const claim = rand32(); const nf = await agent.pay(sim, requestTag(nonce, claim));
-  assert.equal((await fetch(url, { headers: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(claim)}` } })).status, 200);
+  assert.equal((await fetch(url, { headers: { "x-punchcard": `${nonce}.${hex(nf)}.${hex(claim)}` } })).status, 200);
   const forged = "ff".repeat(32), c2 = rand32(); const nf2 = await agent.pay(sim, requestTag(forged, c2));
-  assert.equal((await fetch(url, { headers: { "x-nightpass": `${forged}.${hex(nf2)}.${hex(c2)}` } })).status, 403);
+  assert.equal((await fetch(url, { headers: { "x-punchcard": `${forged}.${hex(nf2)}.${hex(c2)}` } })).status, 403);
 }));

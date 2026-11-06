@@ -1,4 +1,4 @@
-# Nightpass — unlinkable prepaid API credits for AI agents (Midnight)
+# Punchcard — unlinkable prepaid API credits for AI agents (Midnight)
 
 This project is built on the Midnight Network.
 
@@ -6,11 +6,15 @@ AI agents increasingly pay per API call (x402-style micropayments). Today every 
 linkable: the API provider — and anyone watching the chain — sees which wallet called which
 endpoint, how often, and when. For an agent that is a full leak of its strategy.
 
-**Nightpass** lets an agent buy a bundle of *N* calls once, then pay each call with a
+> **Name note:** this project was called *Nightpass* until Nov 6, 2026. We renamed it because another Midnight Buildathon team already has an
+> unrelated project called *NightPass* (Wave 1, membership access control). Hash domain tags inside the contract (`"nightpass:*"`) and a few
+> deploy-script storage names keep the old codename so the contract already deployed on preview stays valid.
+
+**Punchcard** lets an agent buy a bundle of *N* calls once, then pay each call with a
 zero-knowledge proof on Midnight. The provider learns *"this call was paid by a valid, unspent
 credit"* — never which bundle, which buyer, or how many credits are left.
 
-**Live demo:** https://nightpass-demo.nightshift-labs.workers.dev (the compiled contract running in the browser on the local Midnight simulator) · **Live chain view:** https://nightpass-demo.nightshift-labs.workers.dev/live/ (reads the deployed contracts from the public preview indexer and decodes their ledger in the browser) · Slides: [`docs/nightpass-slides.pdf`](docs/nightpass-slides.pdf) · Video (2.5 min, voice-over + subtitles): [`docs/nightpass-demo.mp4`](docs/nightpass-demo.mp4)
+**Live demo:** https://punchcard-demo.nightshift-labs.workers.dev (the compiled contract running in the browser on the local Midnight simulator) · **Live chain view:** https://punchcard-demo.nightshift-labs.workers.dev/live/ (reads the deployed contracts from the public preview indexer and decodes their ledger in the browser) · Slides: [`docs/punchcard-slides.pdf`](docs/punchcard-slides.pdf) · Video (2.5 min, voice-over + subtitles): [`docs/punchcard-demo.mp4`](docs/punchcard-demo.mp4)
 
 ## How it works (dual-ledger model)
 
@@ -20,7 +24,7 @@ credit"* — never which bundle, which buyer, or how many credits are left.
 | Spend | nullifier `H(secret, i)` in `Set`, `nullifier → requestTag` in `Map` | which bundle, which `i`, Merkle path |
 | Counters | `bundlesIssued`, `creditsRedeemed` | remaining credits |
 
-Circuits (`contract/nightpass.compact`):
+Circuits (`contract/punchcard.compact`):
 - `buy(ownerTag, uses)` — **self-serve**: the agent pays `uses × pricePerCredit` NIGHT into the contract (`receiveUnshielded`); the circuit itself computes the commitment `H(ownerTag, uses)` and inserts it.
 - `withdraw(amount, to)` — operator only; sends collected NIGHT out (`sendUnshielded`).
 - `issue(ownerTag, uses)` — operator only (checked against a hashed operator key); adds a bundle paid off-chain (e.g. via x402).
@@ -40,7 +44,7 @@ is on-chain, someone watching the chain cannot replay the ticket and take the re
 
 ## Private state and witnesses (what stays with the agent)
 
-| Witness (`contract/nightpass.compact`) | Supplied by (`src/simulator.mjs`) | Lives in | What becomes public |
+| Witness (`contract/punchcard.compact`) | Supplied by (`src/simulator.mjs`) | Lives in | What becomes public |
 |---|---|---|---|
 | `localSecret()` | operator's private state | operator machine only | `publicKey(secret)`, sealed once at deploy |
 | `bundle()` → `{secret, uses}` | agent wallet (`AgentWallet`, fresh random secret per bundle) | agent only | nothing (only `H(H(secret), uses)` was inserted at purchase) |
@@ -68,7 +72,7 @@ agent                          API server                     Midnight
   | buy(ownerTag, N) ------------------------------------------> commitment H(ownerTag,N) into tree
   | GET /v1/data -------------> 402 {nonce}
   | redeem(sha256(nonce‖claim)) [ZK proof, witnesses local] ---> nullifier + ticket
-  | GET + X-Nightpass: nonce.nullifier.claim -> reads tickets from the indexer
+  | GET + X-Punchcard: nonce.nullifier.claim -> reads tickets from the indexer
   |                            <- 200 (payer unknown)
 ```
 
@@ -78,7 +82,7 @@ Requires Node 22 and the Compact toolchain (compiler 0.36.0).
 
 ```bash
 npm install
-compact compile contract/nightpass.compact contract/managed     # real ZK keys (~10 s); add --skip-zk for fast iteration
+compact compile contract/punchcard.compact contract/managed     # real ZK keys (~10 s); add --skip-zk for fast iteration
 npm test                                                        # 21 tests (16 contract + 5 HTTP paywall)
 node src/demo.mjs                                               # end-to-end story in the local simulator
 npx vite --config vite.config.mjs                               # browser demo (web/) on localhost
@@ -101,7 +105,7 @@ old bundles stay spendable after new issuances (historic roots) · self-serve `b
 HTTP gate: 402 → 200, replay 403, **chain watcher can't front-run a paid call**, nonces expire, **concurrent copies of one header are served once**, a flood of unpaid requests can't evict a nonce, forged nonces refused.
 
 ## HTTP paywall (x402-style) — `src/api-gate.mjs`
-`GET /v1/data` → `402 {nonce}` → the agent runs `redeem(sha256(nonce ‖ claim))` → retries with `X-Nightpass: <nonce>.<nullifier>.<claim>` → `200`.
+`GET /v1/data` → `402 {nonce}` → the agent runs `redeem(sha256(nonce ‖ claim))` → retries with `X-Punchcard: <nonce>.<nullifier>.<claim>` → `200`.
 Replaying the header gives `403`; an old nullifier can't pay a new nonce. Nonces are **stateless** (`expiry ‖ random ‖ HMAC(serverKey, …)`, default lifetime 10 min, long enough for proving + block inclusion + indexer lag), so the server stores nothing per `402` and a request flood cannot evict a nonce an agent is paying for; only served nonces are kept (until they expire), and a nonce being checked is locked, so concurrent copies of one header get one `200`. The same gate reads `tickets` from the Midnight indexer in production (verified on a real chain, see below).
 
 ## Deploying to a public network — `deploy/`
@@ -124,7 +128,7 @@ Contract **`152c84984494587b0a2b58b3ab2e17eae612c1be5ce7c8fc254bfdf7134056b3`** 
 
 Tx ids: [`docs/preview-run.txt`](docs/preview-run.txt), [`docs/preview-deployment.json`](docs/preview-deployment.json).
 
-**Live chain view** — https://nightpass-demo.nightshift-labs.workers.dev/live/ (`deploy/live-web/`, built by `deploy.sh`):
+**Live chain view** — https://punchcard-demo.nightshift-labs.workers.dev/live/ (`deploy/live-web/`, built by `deploy.sh`):
 the browser queries `indexer.preview.midnight.network` (GraphQL `contractAction`), deserializes the contract state with
 `compact-runtime` 0.16 and decodes it with the compiled ledger-8 contract (`deploy/managed`). It shows both deployed
 contracts' counters, Merkle root of bundle commitments, every spent nullifier → request ticket, the sealed operator key, and
@@ -171,6 +175,18 @@ header are sent **at the same time**:
 
 (An earlier run with the previous gate version, contract `402c9059…8150`, blocks 1618162/1618167, gave the same 402/200/403 results.)
 
+## Related work (other Midnight projects for agent payments and access)
+Private payments and access for agents is an active area on Midnight. Projects we know of from the Buildathon's public listing (Nov 6, 2026):
+- **Shade 402** (Wave 1): private x402 payments; each agent is a commitment in a Merkle tree and every invoice is paid from a shared pool after a ZK membership + spending-policy proof.
+- **NightPass** (Wave 1, another team): ZK membership/subscription access for creators' plans, with audience-bound session proofs.
+- **Avtar.ai**: off-chain metering with signed cumulative vouchers, settled from an escrow channel on Midnight.
+- **Sigil**: private authorization policies for agents (policy commitment + per-request nullifiers).
+
+What Punchcard does differently: the agent **prepays a bundle of N credits once** (self-serve `buy()` in NIGHT, or `issue()` after an off-chain x402 payment);
+the bundle commitment is **computed inside the circuit**, so nobody can mint a bigger bundle than was paid; each call spends one **per-index nullifier
+bound to the request** (`requestTag = sha256(nonce ‖ claim)`), so a copied header cannot be front-run; and the provider keeps **no per-agent state**
+and sends **no settlement transaction per call**. It just checks the public ledger in its HTTP 402 gate. No code from the projects above is used.
+
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from
   then on. Anonymity set = all bundles issued before the root the agent proves against (agents should prove
@@ -185,7 +201,7 @@ header are sent **at the same time**:
 
 ## Adoption
 First adopter: our own live x402 API (https://nightshift-x402.nightshift-labs.workers.dev, 18 paid endpoints at $0.003–0.01 per call, listed on x402scan).
-Plan: sell 100- and 1,000-call Nightpass bundles at the same per-call price next to the x402 per-call option; agents that want unlinkable usage pick the bundle.
+Plan: sell 100- and 1,000-call Punchcard bundles at the same per-call price next to the x402 per-call option; agents that want unlinkable usage pick the bundle.
 Providers keep the whole bundle price; a hosted verifier (indexer read + gate) is an optional paid service.
 
 ## Roadmap

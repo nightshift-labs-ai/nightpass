@@ -1,4 +1,4 @@
-// Reads the deployed Nightpass contracts from the public Midnight preview indexer and decodes the ledger client-side.
+// Reads the deployed Punchcard contracts from the public Midnight preview indexer and decodes the ledger client-side.
 import { ContractState } from "@midnight-ntwrk/compact-runtime";
 import { ledger } from "../managed/contract/index.js";
 import deployment from "../../docs/preview-deployment.json";

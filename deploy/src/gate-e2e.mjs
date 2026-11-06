@@ -1,6 +1,6 @@
-// END-TO-END HTTP PAYWALL on a real chain: deploy Nightpass, issue a bundle, run src/api-gate.mjs reading the ledger from the
+// END-TO-END HTTP PAYWALL on a real chain: deploy Punchcard, issue a bundle, run src/api-gate.mjs reading the ledger from the
 // Midnight INDEXER, then pay real HTTP requests with on-chain ZK redeems. (Setup below is shared with deploy.mjs.)
-// Original header: Deploy Nightpass to a public Midnight network (default: preview) and run one issue + one redeem on-chain.
+// Original header: Deploy Punchcard to a public Midnight network (default: preview) and run one issue + one redeem on-chain.
 // Needs: funded wallet (tNIGHT from the faucet), local proof server 8.1.3 on :6300, contract compiled with Compact 0.31.1 into ./managed.
 import { CONFIG, NETWORK } from "./config.mjs";
 import * as Rx from "rxjs";
@@ -66,7 +66,7 @@ const compiled = CompiledContract.withCompiledFileAssets(CompiledContract.withWi
 const operatorSecret = randomBytes(32).toString("hex");
 const deployed = await deployContract(providers, { compiledContract: compiled, args: [1000n], privateStateId: "nightpass-gate", initialPrivateState: { secret: operatorSecret, next: 0 } });
 const address = deployed.deployTxData.public.contractAddress;
-console.log(`deployed Nightpass at ${address}`);
+console.log(`deployed Punchcard at ${address}`);
 const iss = await deployed.callTx.issue(pureCircuits.ownerTag(bundle.secret), bundle.uses);
 console.log(`issue(ownerTag, 3) in block ${iss.public.blockHeight}`);
 
@@ -85,11 +85,11 @@ for (let k = 0; k < 2; k++) {
   const red = await deployed.callTx.redeem(requestTag(nonce, claim));
   const nf = red.private.result;
   await waitTicket(nf);
-  const thief = await fetch(url, { headers: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(new Uint8Array(32))}` } });
-  const hdr = { "x-nightpass": `${nonce}.${hex(nf)}.${hex(claim)}` };
+  const thief = await fetch(url, { headers: { "x-punchcard": `${nonce}.${hex(nf)}.${hex(new Uint8Array(32))}` } });
+  const hdr = { "x-punchcard": `${nonce}.${hex(nf)}.${hex(claim)}` };
   const conc = (await Promise.all([fetch(url, { headers: hdr }), fetch(url, { headers: hdr })])).map((r) => r.status);
   const r2 = { status: conc.filter((c) => c === 200).length === 1 ? 200 : `BAD ${conc}` };
-  const r3 = await fetch(url, { headers: { "x-nightpass": `${nonce}.${hex(nf)}.${hex(claim)}` } });
+  const r3 = await fetch(url, { headers: { "x-punchcard": `${nonce}.${hex(nf)}.${hex(claim)}` } });
   const row = { call: k, first: r1.status, redeemBlock: String(red.public.blockHeight), redeemTx: red.public.txId, thiefWithoutClaim: thief.status, paid: r2.status, concurrentCopies: conc, replay: r3.status };
   console.log(JSON.stringify(row)); results.push(row);
 }

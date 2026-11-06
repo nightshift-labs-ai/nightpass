@@ -1,11 +1,11 @@
 {
-  "name": "nightpass",
+  "name": "punchcard",
   "version": "0.1.0",
   "description": "Unlinkable prepaid API credits for AI agents, on Midnight (Compact ZK contract + simulator + demo UI)",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "compile": "compact compile --skip-zk contract/nightpass.compact contract/managed",
+    "compile": "compact compile --skip-zk contract/punchcard.compact contract/managed",
     "test": "node --test test/*.test.mjs",
     "demo": "node src/demo.mjs",
     "web": "vite --config vite.config.mjs",

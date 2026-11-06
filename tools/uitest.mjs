@@ -10,7 +10,7 @@ for (const id of ["#dbl", "#infl", "#fake"]) { await p.click(id); await p.waitFo
 await p.click("#buy2"); await p.waitForFunction(() => document.getElementById("bi").textContent === "2");
 const res = await p.evaluate(() => ({ served: +served.textContent, left: +left.textContent, cr: +cr.textContent,
   rejected: [...document.querySelectorAll("#events li.ok")].length }));
-await p.screenshot({ path: process.argv[3] ?? "/tmp/nightpass-ui.png", fullPage: true });
+await p.screenshot({ path: process.argv[3] ?? "/tmp/punchcard-ui.png", fullPage: true });
 console.log(JSON.stringify({ ...res, errs }));
 await b.close();
 const ok = res.served === 3 && res.left === 7 && res.cr === 3 && res.rejected === 3 && errs.length === 0;

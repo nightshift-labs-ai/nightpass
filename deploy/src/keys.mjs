@@ -4,7 +4,7 @@ import { randomBytes } from "node:crypto";
 import { HDWallet, Roles, createKeystore } from "@midnightntwrk/wallet-sdk";
 import * as ledger from "@midnight-ntwrk/midnight-js-protocol/ledger";
 import { getNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
-// Seed file lives OUTSIDE the repo (default ~/.nightpass/seed.hex, mode 600). Created on first use.
+// Seed file lives OUTSIDE the repo (default ~/.nightpass/seed.hex, mode 600). Created on first use. (path keeps the project codename "nightpass")
 export const SEED_FILE = process.env.WALLET_SEED_FILE ?? `${process.env.HOME}/.nightpass/seed.hex`;
 export const readSeed = () => {
   if (process.env.WALLET_SEED) return Buffer.from(process.env.WALLET_SEED.trim(), "hex");

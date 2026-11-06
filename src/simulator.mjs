@@ -1,4 +1,4 @@
-// Local Midnight simulator for the Nightpass contract (no network, no proof server).
+// Local Midnight simulator for the Punchcard contract (no network, no proof server).
 // Runs the compiled circuits exactly as the proof server would, including all asserts.
 import * as rt from "@midnight-ntwrk/compact-runtime";
 import { Contract, ledger, pureCircuits } from "../contract/managed/contract/index.js";
@@ -21,9 +21,9 @@ const witnesses = {
   useIndex: ({ privateState }) => [privateState, privateState.spend.index],
 };
 
-export class NightpassSim {
+export class PunchcardSim {
   static async deploy(operatorSecret = rand32(), price = 1000n) {
-    const sim = new NightpassSim();
+    const sim = new PunchcardSim();
     sim.contract = new Contract(witnesses);
     sim.address = rt.sampleContractAddress();
     const init = await sim.contract.initialState(rt.createConstructorContext({ secret: operatorSecret }, "0".repeat(64)), price);

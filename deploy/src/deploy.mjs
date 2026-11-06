@@ -1,4 +1,4 @@
-// Deploy Nightpass to a public Midnight network (default: preview) and run one issue + one redeem on-chain.
+// Deploy Punchcard to a public Midnight network (default: preview) and run one issue + one redeem on-chain.
 // Needs: funded wallet (tNIGHT from the faucet), local proof server 8.1.3 on :6300, contract compiled with Compact 0.31.1 into ./managed.
 import { CONFIG, NETWORK } from "./config.mjs";
 import * as Rx from "rxjs";
@@ -64,7 +64,7 @@ const compiled = CompiledContract.withCompiledFileAssets(CompiledContract.withWi
 const operatorSecret = randomBytes(32).toString("hex");
 const deployed = await deployContract(providers, { compiledContract: compiled, args: [1000n], privateStateId: "nightpass", initialPrivateState: { secret: operatorSecret, next: 0 } });
 const address = deployed.deployTxData.public.contractAddress;
-console.log(`deployed Nightpass at ${address}`);
+console.log(`deployed Punchcard at ${address}`);
 const log = [];
 const step = (name, r) => { const b = String(r.public.blockHeight); log.push({ step: name, block: b, txId: r.public.txId }); console.log(`${name} landed in block ${b} (tx ${r.public.txId})`); };
 // 1) operator issues a 3-credit bundle: the agent hands over only ownerTag = H(secret); the commitment is built in-circuit

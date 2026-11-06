@@ -1,10 +1,10 @@
 // End-to-end story in the local simulator:
 // an AI agent buys 3 API calls, then pays each call anonymously; the API checks the ticket on the ledger.
-import { NightpassSim, AgentWallet, rand32, hex } from "./simulator.mjs";
+import { PunchcardSim, AgentWallet, rand32, hex } from "./simulator.mjs";
 
 const short = (u8) => hex(u8).slice(0, 12) + "…";
-const sim = await NightpassSim.deploy();
-console.log("1) Operator deployed Nightpass. Public operator key:", short(sim.ledger.operator));
+const sim = await PunchcardSim.deploy();
+console.log("1) Operator deployed Punchcard. Public operator key:", short(sim.ledger.operator));
 
 // --- the "API server" side: issues a nonce per request and checks the ledger before serving
 const api = {

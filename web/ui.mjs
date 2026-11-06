@@ -1,8 +1,8 @@
-import { NightpassSim, AgentWallet, rand32, hex, tag, pureCircuits } from "../src/simulator.mjs";
+import { PunchcardSim, AgentWallet, rand32, hex, tag, pureCircuits } from "../src/simulator.mjs";
 import { Contract } from "../contract/managed/contract/index.js";
 const $ = (id) => document.getElementById(id);
 const short = (u8) => hex(u8).slice(0, 16) + "…";
-const sim = await NightpassSim.deploy();
+const sim = await PunchcardSim.deploy();
 const wallet = new AgentWallet();
 let served = 0, refused = 0, lastSpend = null;
 const commitments = [];

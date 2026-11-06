@@ -9,7 +9,7 @@ const res = await p.evaluate(() => ({ bi: [...document.querySelectorAll('[data-k
   nf: document.querySelector("#c0")?.textContent.match(/nf ([0-9a-f]{64})/)?.[1] }));
 await p.fill("#nf", res.nf ?? ""); await p.click("#chk"); res.ans = await p.textContent("#ans");
 await p.fill("#nf", "ab".repeat(32)); await p.click("#chk"); res.ans2 = await p.textContent("#ans");
-await p.screenshot({ path: process.argv[3] ?? "/tmp/nightpass-live.png", fullPage: true });
+await p.screenshot({ path: process.argv[3] ?? "/tmp/punchcard-live.png", fullPage: true });
 console.log(JSON.stringify({ ...res, errs })); await b.close();
 const ok = res.bi.length === 2 && res.cr.every((x) => x >= 2) && /spent on contract A/.test(res.ans) && /not spent/.test(res.ans2) && !errs.length;
 console.log(ok ? "LIVE TEST PASSED" : "LIVE TEST FAILED"); process.exit(ok ? 0 : 1);

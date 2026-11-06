@@ -1,19 +1,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { NightpassSim, AgentWallet, tag, hex, rand32, pureCircuits } from "../src/simulator.mjs";
+import { PunchcardSim, AgentWallet, tag, hex, rand32, pureCircuits } from "../src/simulator.mjs";
 
 const rejects = (p, re) => assert.rejects(p, (e) => re.test(String(e.message ?? e)));
 
 test("deploy records only the operator's derived public key", async () => {
   const sk = rand32();
-  const sim = await NightpassSim.deploy(sk);
+  const sim = await PunchcardSim.deploy(sk);
   assert.equal(hex(sim.ledger.operator), hex(pureCircuits.publicKey(sk)));
   assert.notEqual(hex(sim.ledger.operator), hex(sk));
   assert.equal(sim.ledger.bundlesIssued, 0n);
 });
 
 test("only the operator can issue bundles", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const req = new AgentWallet().newBundle(5);
   await rejects(sim.issue(req, rand32()), /Only the operator/);
   await sim.issue(req);
@@ -21,7 +21,7 @@ test("only the operator can issue bundles", async () => {
 });
 
 test("an agent can spend exactly N credits from an N-use bundle", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const w = new AgentWallet();
   await sim.issue(w.newBundle(3));
   for (let i = 0; i < 3; i++) await w.pay(sim, tag(`req-${i}`));
@@ -33,7 +33,7 @@ test("an agent can spend exactly N credits from an N-use bundle", async () => {
 });
 
 test("double spend of the same credit is rejected", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const w = new AgentWallet();
   await sim.issue(w.newBundle(2));
   const spend = { bundle: w.bundles[0].bundle, index: 0n };
@@ -43,7 +43,7 @@ test("double spend of the same credit is rejected", async () => {
 });
 
 test("a bundle that was never issued (unpaid) cannot be spent", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   await sim.issue(new AgentWallet().newBundle(1)); // someone else's bundle
   const thief = new AgentWallet(); thief.newBundle(10);       // never paid / issued
   await assert.rejects(thief.pay(sim, tag("free-lunch")));
@@ -51,7 +51,7 @@ test("a bundle that was never issued (unpaid) cannot be spent", async () => {
 });
 
 test("inflating the use count of a real bundle fails (commitment binds N)", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const w = new AgentWallet();
   await sim.issue(w.newBundle(1));
   const real = w.bundles[0].bundle;
@@ -68,7 +68,7 @@ test("inflating the use count of a real bundle fails (commitment binds N)", asyn
 });
 
 test("redemptions are unlinkable: on-chain data never contains the bundle commitment", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const alice = new AgentWallet(), bob = new AgentWallet();
   const ra = alice.newBundle(2), rb = bob.newBundle(2), ca = ra.commitment, cb = rb.commitment;
   await sim.issue(ra); await sim.issue(rb);
@@ -85,7 +85,7 @@ test("redemptions are unlinkable: on-chain data never contains the bundle commit
 });
 
 test("the API operator can verify which request a nullifier paid for", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const w = new AgentWallet();
   await sim.issue(w.newBundle(1));
   const reqTag = rand32(); // server-chosen nonce for this API call
@@ -95,7 +95,7 @@ test("the API operator can verify which request a nullifier paid for", async () 
 });
 
 test("bundles issued later do not break proofs for older bundles (historic roots)", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const w = new AgentWallet();
   await sim.issue(w.newBundle(2));
   for (let i = 0; i < 5; i++) await sim.issue(new AgentWallet().newBundle(1));
@@ -105,7 +105,7 @@ test("bundles issued later do not break proofs for older bundles (historic roots
 });
 
 test("a forged Merkle path (fake tree) is rejected by the circuit", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const honest = new AgentWallet();
   await sim.issue(honest.newBundle(1));
   const realPath = sim.ledger.bundles.findPathForLeaf(pureCircuits.bundleCommitment(honest.bundles[0].bundle));
@@ -122,7 +122,7 @@ test("a forged Merkle path (fake tree) is rejected by the circuit", async () => 
 });
 
 test("self-serve buy(): agent pays in-contract, no operator step, credits spendable", async () => {
-  const sim = await NightpassSim.deploy(rand32(), 250n);
+  const sim = await PunchcardSim.deploy(rand32(), 250n);
   const w = new AgentWallet();
   await w.buy(sim, 3);
   assert.equal(sim.ledger.bundlesIssued, 1n);
@@ -132,7 +132,7 @@ test("self-serve buy(): agent pays in-contract, no operator step, credits spenda
 });
 
 test("no credit inflation: an agent paid for 1 credit cannot spend more, whatever it claims", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const w = new AgentWallet();
   const req = w.newBundle(1000);                 // agent's wallet THINKS it has 1000 uses …
   await sim.issue(req, sim.operatorSecret, 1);  // … but the operator was paid for 1 and issues 1
@@ -147,7 +147,7 @@ test("no credit inflation: an agent paid for 1 credit cannot spend more, whateve
 });
 
 test("issue() and buy() reject empty bundles", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const req = new AgentWallet().newBundle(1);
   await rejects(sim.issue(req, sim.operatorSecret, 0), /at least one credit/);
   await rejects((async () => sim.call("buy", { secret: new Uint8Array(32) }, req.owner, 0n))(), /at least one credit/);
@@ -155,7 +155,7 @@ test("issue() and buy() reject empty bundles", async () => {
 });
 
 test("the operator never sees the agent's secret: owner tag and commitment reveal no nullifier", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const w = new AgentWallet(); const req = w.newBundle(2);
   await sim.issue(req);
   const nf = await w.pay(sim, tag("r"));
@@ -164,13 +164,13 @@ test("the operator never sees the agent's secret: owner tag and commitment revea
 });
 
 test("operator can withdraw what the contract holds; withdraw beyond balance is rejected", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const to = { bytes: rand32() };
   await rejects((async () => sim.call("withdraw", { secret: sim.operatorSecret }, 1n, to))(), /Not enough NIGHT/);
 });
 
 test("only the operator can withdraw", async () => {
-  const sim = await NightpassSim.deploy();
+  const sim = await PunchcardSim.deploy();
   const to = { bytes: rand32() };
   await rejects((async () => sim.call("withdraw", { secret: rand32() }, 1n, to))(), /Only the operator/);
 });

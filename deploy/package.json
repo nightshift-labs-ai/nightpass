@@ -1,12 +1,12 @@
 {
-  "name": "nightpass-deploy",
+  "name": "punchcard-deploy",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Deploy Nightpass to a public Midnight network (ledger 8: Compact 0.31.1 / runtime 0.16.0 / Midnight.js 4.1.1)",
+  "description": "Deploy Punchcard to a public Midnight network (ledger 8: Compact 0.31.1 / runtime 0.16.0 / Midnight.js 4.1.1)",
   "engines": { "node": ">=22.12" },
   "scripts": {
-    "compile": "compact compile +0.31.1 ../contract/nightpass.compact managed"
+    "compile": "compact compile +0.31.1 ../contract/punchcard.compact managed"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.16.0",
