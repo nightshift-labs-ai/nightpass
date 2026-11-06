@@ -18,10 +18,10 @@ img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
 <li>Today the only options are: trust the provider, or don't use paid APIs.</li></ul></div>
 
 <div class="s"><h2>The idea</h2><ul>
-<li><b>Buy once:</b> the agent buys a bundle of <i>N</i> calls; the chain stores only a hiding commitment <code>H(secret, N)</code>.</li>
+<li><b>Buy once:</b> the agent buys a bundle of <i>N</i> calls; the agent sends only <code>ownerTag = H(secret)</code>; the circuit stores the commitment <code>H(ownerTag, N)</code>. Self-serve <code>buy()</code> pays NIGHT into the contract.</li>
 <li><b>Spend anonymously:</b> each call = one ZK <code>redeem()</code> proving "I own an unspent use of <i>some</i> bundle in the tree".</li>
 <li><b>No double spend:</b> a per-use nullifier <code>H(secret, i)</code> goes into a public set.</li>
-<li><b>Bound to the request:</b> the API's nonce is recorded next to the nullifier → the server serves only paid requests.</li></ul></div>
+<li><b>Bound to the request:</b> <code>sha256(nonce ‖ claim)</code> is recorded next to the nullifier → only the paying agent can collect the response (no front-running).</li></ul></div>
 
 <div class="s"><h2>Dual-ledger design</h2><table>
 <tr><th></th><th>Public ledger (on-chain)</th><th>Private state (agent only)</th></tr>
@@ -36,8 +36,20 @@ img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
 <li class="g">✔ root is a current or past root of the tree → only paid bundles</li>
 <li class="g">✔ <code>useIndex &lt; N</code> → exactly N spends</li>
 <li class="g">✔ nullifier unspent → no replay / double spend</li>
-<li class="g">✔ only the operator can <code>issue()</code></li></ul>
-<p class="m">10 simulator tests cover each rule plus unlinkability and request binding — all passing. Contract compiles with real ZK keys.</p></div>
+<li class="g">✔ commitment built in-circuit from (ownerTag, N) → no inflation via <code>issue()</code> or <code>buy()</code></li>
+<li class="g">✔ only the operator can <code>issue()</code> / <code>withdraw()</code>; <code>buy()</code> must pay N × price NIGHT</li></ul>
+<p class="m">19 tests (16 contract + 3 HTTP paywall) cover every rule plus unlinkability, front-running and request binding — all passing.</p></div>
+
+<div class="s"><h2>Verified on a real Midnight chain</h2><table>
+<tr><th>Step (real ZK proofs, local Midnight node 1.0 + indexer + proof server)</th><th>Result</th></tr>
+<tr><td>deploy, price 1000 / credit</td><td class="g">contract 7e9c09bf…</td></tr>
+<tr><td><code>issue(ownerTag, 3)</code></td><td class="g">block 71</td></tr>
+<tr><td><code>redeem</code> credit #0</td><td class="g">block 75</td></tr>
+<tr><td><code>redeem</code> credit #0 again</td><td class="k">rejected: already spent</td></tr>
+<tr><td><code>redeem</code> credit #1</td><td class="g">block 79</td></tr>
+<tr><td><code>buy(ownerTag, 2)</code> paying 2000 NIGHT units</td><td class="g">block 82</td></tr>
+<tr><td><code>withdraw(1500)</code> (in-circuit balance check)</td><td class="g">block 86</td></tr></table>
+<p class="m" style="font-size:20px">Transcript + tx ids in the repo: docs/localnet-run.txt. Public preview deploy uses the same script.</p></div>
 
 <div class="s"><h2>Demo</h2><img src="demo-ui.png"><p class="m" style="font-size:20px">Live: nightpass-demo.nightshift-labs.workers.dev — the compiled contract running in the browser (local Midnight simulator), with three "try to cheat" buttons.</p></div>
 
@@ -48,10 +60,10 @@ img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
 <li><b>Model:</b> providers keep 100% of the bundle price; optional hosted verifier.</li></ul></div>
 
 <div class="s"><h2>Roadmap &amp; honest limits</h2><ul>
-<li>Next: Midnight testnet deploy + Lace wallet in the UI.</li>
+<li>Next: public preview deploy (local-chain run done) + Lace wallet in the UI.</li>
 <li>Shielded payment inside the purchase, so buying is private too.</li>
 <li>x402 integration: verify the nullifier via the indexer in the API middleware.</li>
 <li>Bundle expiry, per-endpoint credit classes.</li>
-<li class="m">Limits: the operator knows who bought which commitment; unlinkability starts after purchase. Anonymity set = bundles issued before the proven root.</li></ul>
+<li class="m">Limits: purchase is public, unlinkability starts after it; anonymity set = bundles before the proven root; use a fresh fee wallet + hidden IP for redemptions.</li></ul>
 <div class="f">Built by an AI agent (Claude) for Nightshift Labs · Apache-2.0 · Compact 0.36 · compact-runtime 0.21</div></div>
 </body></html>

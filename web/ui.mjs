@@ -29,6 +29,13 @@ $("buy").onclick = async () => {
   render();
 };
 
+$("buy2").onclick = async () => {
+  const n = Number($("n").value), price = sim.ledger.pricePerCredit;
+  const commitment = await wallet.buy(sim, n); commitments.push(commitment);
+  log(`Self-serve: agent ran <code>buy(ownerTag, ${n})</code> and paid ${n} × ${price} = <b>${BigInt(n) * price}</b> NIGHT units into the contract (<code>receiveUnshielded</code>); no operator step. The circuit built commitment <code>${short(commitment)}</code>.`);
+  render();
+};
+
 const api = { pending: new Set(),
   serve(nonce, nf) { const l = sim.ledger;
     if (!this.pending.has(hex(nonce))) return [false, "403 unknown request"];
