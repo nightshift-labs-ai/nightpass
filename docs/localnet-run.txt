@@ -1,0 +1,10 @@
+[undeployed] wallet synced: mn_addr_undeployed1h3ssm5ru2t6eqy4g3she78zlxn96e36ms6pq996aduvmateh9p9sk96u7s
+DUST (SPECK): 1250000000000000000000000
+deployed Nightpass at 7e9c09bf61e03599d95cdbcfa834bc34f5c689f752cc304d6063aba279c39ca8
+issue(ownerTag, 3) landed in block 71 (tx 0083576469439f76e1dccda30597450cfa2bb84d759f47d3809ba873a55038c48e)
+redeem(requestTag) #0 landed in block 75 (tx 00a34a8beca70b24b873bd2ab8e4bec58383389e279fada18950bebcc90f1cf3b2)
+double spend of credit #0: rejected: This credit was already spent
+redeem(requestTag) #1 landed in block 79 (tx 00a5fdc94b50242d4c5f6f29d74146ee201e8b46052015670070e7c15e01df6daa)
+buy(ownerTag, 2) paying 2000 NIGHT units landed in block 82 (tx 003886101f66a307f5c7db9a7ce5b6276e9ee9329ea16599cc09aeb9aca2af965c)
+withdraw(1500, operator) landed in block 86 (tx 00ffb8887cd0d7506bb6aa1f4b9140cae5e6245134f1691e162e72f36e6cbb17da)
+on-chain: bundlesIssued=2 creditsRedeemed=2 spentNullifiers=2 tickets=2
