@@ -185,7 +185,7 @@ Private payments and access for agents is an active area on Midnight. Projects w
 What Punchcard does differently: the agent **prepays a bundle of N credits once** (self-serve `buy()` in NIGHT, or `issue()` after an off-chain x402 payment);
 the bundle commitment is **computed inside the circuit**, so nobody can mint a bigger bundle than was paid; each call spends one **per-index nullifier
 bound to the request** (`requestTag = sha256(nonce ‖ claim)`), so a copied header cannot be front-run; and the provider keeps **no per-agent state**
-and sends **no settlement transaction per call**. It just checks the public ledger in its HTTP 402 gate. No code from the projects above is used.
+and sends **no settlement transaction per call**. It just checks the public ledger in its HTTP 402 gate. There is also **no custodian**: how many credits a bundle has left is not reported by a backend. The circuit enforces it (`i < uses` plus a unique nullifier per index), so neither the operator nor the provider holds agent balances. No code from the projects above is used.
 
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from
