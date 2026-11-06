@@ -14,16 +14,16 @@ test("deploy records only the operator's derived public key", async () => {
 
 test("only the operator can issue bundles", async () => {
   const sim = await NightpassSim.deploy();
-  const { commitment } = new AgentWallet().newBundle(5);
-  await rejects(sim.issue(commitment, rand32()), /Only the operator/);
-  await sim.issue(commitment);
+  const req = new AgentWallet().newBundle(5);
+  await rejects(sim.issue(req, rand32()), /Only the operator/);
+  await sim.issue(req);
   assert.equal(sim.ledger.bundlesIssued, 1n);
 });
 
 test("an agent can spend exactly N credits from an N-use bundle", async () => {
   const sim = await NightpassSim.deploy();
   const w = new AgentWallet();
-  await sim.issue(w.newBundle(3).commitment);
+  await sim.issue(w.newBundle(3));
   for (let i = 0; i < 3; i++) await w.pay(sim, tag(`req-${i}`));
   assert.equal(sim.ledger.creditsRedeemed, 3n);
   assert.equal(w.remaining(), 0n);
@@ -35,7 +35,7 @@ test("an agent can spend exactly N credits from an N-use bundle", async () => {
 test("double spend of the same credit is rejected", async () => {
   const sim = await NightpassSim.deploy();
   const w = new AgentWallet();
-  await sim.issue(w.newBundle(2).commitment);
+  await sim.issue(w.newBundle(2));
   const spend = { bundle: w.bundles[0].bundle, index: 0n };
   await sim.call("redeem", { secret: new Uint8Array(32), spend }, tag("a"));
   await rejects(sim.call("redeem", { secret: new Uint8Array(32), spend }, tag("b")), /already spent/);
@@ -44,7 +44,7 @@ test("double spend of the same credit is rejected", async () => {
 
 test("a bundle that was never issued (unpaid) cannot be spent", async () => {
   const sim = await NightpassSim.deploy();
-  await sim.issue(new AgentWallet().newBundle(1).commitment); // someone else's bundle
+  await sim.issue(new AgentWallet().newBundle(1)); // someone else's bundle
   const thief = new AgentWallet(); thief.newBundle(10);       // never paid / issued
   await assert.rejects(thief.pay(sim, tag("free-lunch")));
   assert.equal(sim.ledger.creditsRedeemed, 0n);
@@ -53,7 +53,7 @@ test("a bundle that was never issued (unpaid) cannot be spent", async () => {
 test("inflating the use count of a real bundle fails (commitment binds N)", async () => {
   const sim = await NightpassSim.deploy();
   const w = new AgentWallet();
-  await sim.issue(w.newBundle(1).commitment);
+  await sim.issue(w.newBundle(1));
   const real = w.bundles[0].bundle;
   const path = sim.ledger.bundles.findPathForLeaf(pureCircuits.bundleCommitment(real));
   // custom witnesses: claim the same secret with uses=100, reusing the real path
@@ -70,8 +70,8 @@ test("inflating the use count of a real bundle fails (commitment binds N)", asyn
 test("redemptions are unlinkable: on-chain data never contains the bundle commitment", async () => {
   const sim = await NightpassSim.deploy();
   const alice = new AgentWallet(), bob = new AgentWallet();
-  const ca = alice.newBundle(2).commitment, cb = bob.newBundle(2).commitment;
-  await sim.issue(ca); await sim.issue(cb);
+  const ra = alice.newBundle(2), rb = bob.newBundle(2), ca = ra.commitment, cb = rb.commitment;
+  await sim.issue(ra); await sim.issue(rb);
   const nfs = [await alice.pay(sim, tag("a1")), await bob.pay(sim, tag("b1")), await alice.pay(sim, tag("a2"))];
   const seen = new Set(nfs.map(hex));
   assert.equal(seen.size, 3, "every use has a fresh nullifier");
@@ -87,7 +87,7 @@ test("redemptions are unlinkable: on-chain data never contains the bundle commit
 test("the API operator can verify which request a nullifier paid for", async () => {
   const sim = await NightpassSim.deploy();
   const w = new AgentWallet();
-  await sim.issue(w.newBundle(1).commitment);
+  await sim.issue(w.newBundle(1));
   const reqTag = rand32(); // server-chosen nonce for this API call
   const nf = await w.pay(sim, reqTag);
   assert.ok(sim.ledger.tickets.member(nf));
@@ -97,8 +97,8 @@ test("the API operator can verify which request a nullifier paid for", async () 
 test("bundles issued later do not break proofs for older bundles (historic roots)", async () => {
   const sim = await NightpassSim.deploy();
   const w = new AgentWallet();
-  await sim.issue(w.newBundle(2).commitment);
-  for (let i = 0; i < 5; i++) await sim.issue(new AgentWallet().newBundle(1).commitment);
+  await sim.issue(w.newBundle(2));
+  for (let i = 0; i < 5; i++) await sim.issue(new AgentWallet().newBundle(1));
   await w.pay(sim, tag("late"));
   assert.equal(sim.ledger.creditsRedeemed, 1n);
   assert.equal(sim.ledger.bundlesIssued, 6n);
@@ -107,7 +107,7 @@ test("bundles issued later do not break proofs for older bundles (historic roots
 test("a forged Merkle path (fake tree) is rejected by the circuit", async () => {
   const sim = await NightpassSim.deploy();
   const honest = new AgentWallet();
-  await sim.issue(honest.newBundle(1).commitment);
+  await sim.issue(honest.newBundle(1));
   const realPath = sim.ledger.bundles.findPathForLeaf(pureCircuits.bundleCommitment(honest.bundles[0].bundle));
   const fake = { secret: rand32(), uses: 5n };
   const forged = { leaf: pureCircuits.bundleCommitment(fake), path: realPath.path };
@@ -131,13 +131,42 @@ test("self-serve buy(): agent pays in-contract, no operator step, credits spenda
   assert.equal(sim.ledger.creditsRedeemed, 3n);
 });
 
-test("buy() rejects a commitment that does not match the paid bundle size", async () => {
+test("no credit inflation: an agent paid for 1 credit cannot spend more, whatever it claims", async () => {
   const sim = await NightpassSim.deploy();
   const w = new AgentWallet();
-  const { bundle } = w.newBundle(100);                       // commitment for 100 uses …
-  const small = pureCircuits.bundleCommitment(bundle);
-  await rejects((async () => sim.call("buy", { secret: new Uint8Array(32), spend: { bundle, index: 0n } }, small, 1n))(), /does not match/); // … paying for 1
+  const req = w.newBundle(1000);                 // agent's wallet THINKS it has 1000 uses …
+  await sim.issue(req, sim.operatorSecret, 1);  // … but the operator was paid for 1 and issues 1
+  // the leaf in the tree is H(owner, 1); a bundle claiming 1000 uses has a different commitment → not in the tree
+  await rejects(w.pay(sim, tag("x")), /not found in tree|not in the tree|does not belong/);
+  // honest view of the same bundle (1 use) works exactly once
+  const honest = new AgentWallet(); honest.bundles.push({ bundle: { secret: req.bundle.secret, uses: 1n }, next: 0n });
+  await honest.pay(sim, tag("ok"));
+  honest.bundles[0].next = 0n; await rejects(honest.pay(sim, tag("again")), /already spent/);
+  honest.bundles[0].next = 1n; honest.bundles[0].bundle.uses = 2n; await rejects(honest.pay(sim, tag("idx1")), /not found in tree|not in the tree|does not belong/);
+  assert.equal(sim.ledger.creditsRedeemed, 1n);
+});
+
+test("issue() and buy() reject empty bundles", async () => {
+  const sim = await NightpassSim.deploy();
+  const req = new AgentWallet().newBundle(1);
+  await rejects(sim.issue(req, sim.operatorSecret, 0), /at least one credit/);
+  await rejects((async () => sim.call("buy", { secret: new Uint8Array(32) }, req.owner, 0n))(), /at least one credit/);
   assert.equal(sim.ledger.bundlesIssued, 0n);
+});
+
+test("the operator never sees the agent's secret: owner tag and commitment reveal no nullifier", async () => {
+  const sim = await NightpassSim.deploy();
+  const w = new AgentWallet(); const req = w.newBundle(2);
+  await sim.issue(req);
+  const nf = await w.pay(sim, tag("r"));
+  for (const v of [req.owner, req.commitment]) assert.notEqual(hex(v), hex(nf));
+  assert.notEqual(hex(req.owner), hex(req.bundle.secret));
+});
+
+test("operator can withdraw what the contract holds; withdraw beyond balance is rejected", async () => {
+  const sim = await NightpassSim.deploy();
+  const to = { bytes: rand32() };
+  await rejects((async () => sim.call("withdraw", { secret: sim.operatorSecret }, 1n, to))(), /Not enough NIGHT/);
 });
 
 test("only the operator can withdraw", async () => {

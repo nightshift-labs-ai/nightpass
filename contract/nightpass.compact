@@ -36,22 +36,23 @@ constructor(price: Uint<64>) {
   pricePerCredit = disclose(price);
 }
 
-// Operator records a paid bundle. Only the commitment becomes public.
-export circuit issue(commitment: Bytes<32>): [] {
+// Operator records a paid bundle of `uses` credits. The agent hands over only its
+// owner tag H(secret); the commitment is computed IN the circuit, so the agent cannot
+// smuggle in a bigger bundle than the one it paid for, and the operator never learns
+// the secret (so it cannot compute the agent's nullifiers).
+export circuit issue(owner: Bytes<32>, uses: Uint<16>): [] {
   assert(publicKey(localSecret()) == operator, "Only the operator can issue bundles");
-  bundles.insert(disclose(commitment));
+  assert(uses > 0, "A bundle needs at least one credit");
+  bundles.insert(disclose(commitmentOf(owner, uses)));
   bundlesIssued.increment(1);
 }
 
-// Self-serve purchase: the agent pays uses * price in NIGHT to the contract and adds its own commitment.
-// The commitment hides the secret; `uses` is bound inside it and also disclosed here so the price can be checked.
-export circuit buy(commitment: Bytes<32>, uses: Uint<16>): [] {
+// Self-serve purchase: the agent pays uses * price in NIGHT (unshielded) to the contract and
+// registers its own bundle. Again the commitment is computed in-circuit from (owner tag, uses).
+export circuit buy(owner: Bytes<32>, uses: Uint<16>): [] {
   assert(uses > 0, "Buy at least one credit");
-  const b = bundle();
-  assert(b.uses == uses, "Bundle size does not match");
-  assert(bundleCommitment(b) == commitment, "Commitment does not match the bundle");
   receiveUnshielded(nativeToken(), (disclose(uses) as Uint<64>) * pricePerCredit as Uint<128>);
-  bundles.insert(disclose(commitment));
+  bundles.insert(disclose(commitmentOf(owner, uses)));
   bundlesIssued.increment(1);
 }
 
@@ -79,8 +80,16 @@ export circuit redeem(requestTag: Bytes<32>): Bytes<32> {
 }
 
 // Pure helpers, also exported so the TypeScript side computes identical values.
+export pure circuit ownerTag(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "nightpass:owner"), secret]);
+}
+
+export pure circuit commitmentOf(owner: Bytes<32>, uses: Uint<16>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "nightpass:bundle"), owner, persistentHash<Uint<16>>(uses)]);
+}
+
 export pure circuit bundleCommitment(b: Bundle): Bytes<32> {
-  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "nightpass:bundle"), persistentHash<Bundle>(b)]);
+  return commitmentOf(ownerTag(b.secret), b.uses);
 }
 
 export pure circuit nullifier(secret: Bytes<32>, i: Uint<16>): Bytes<32> {

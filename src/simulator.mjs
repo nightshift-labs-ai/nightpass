@@ -45,7 +45,8 @@ export class NightpassSim {
   }
   get ledger() { return ledger(this.state); }
   // operator action
-  issue(commitment, secret = this.operatorSecret) { return this.call("issue", { secret }, commitment); }
+  // `req` = what the agent sends after paying off-chain: its owner tag H(secret) and the bundle size the operator was paid for
+  issue(req, secret = this.operatorSecret, uses = req.uses) { return this.call("issue", { secret }, req.owner, BigInt(uses)); }
 }
 
 // The agent's wallet: keeps bundles + next unused index privately.
@@ -54,12 +55,12 @@ export class AgentWallet {
   newBundle(uses) {
     const b = { secret: rand32(), uses: BigInt(uses) };
     this.bundles.push({ bundle: b, next: 0n });
-    return { bundle: b, commitment: pureCircuits.bundleCommitment(b) };
+    return { bundle: b, owner: pureCircuits.ownerTag(b.secret), uses: b.uses, commitment: pureCircuits.bundleCommitment(b) };
   }
   // self-serve: pay uses * price NIGHT in-contract and register the commitment (no operator step)
   async buy(sim, uses) {
-    const { bundle, commitment } = this.newBundle(uses);
-    await sim.call("buy", { secret: new Uint8Array(32), spend: { bundle, index: 0n } }, commitment, BigInt(uses));
+    const { owner, commitment } = this.newBundle(uses);
+    await sim.call("buy", { secret: new Uint8Array(32) }, owner, BigInt(uses)); // no witness needed: commitment is computed in-circuit
     return commitment;
   }
   remaining() { return this.bundles.reduce((s, x) => s + (x.bundle.uses - x.next), 0n); }
