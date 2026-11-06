@@ -6,7 +6,7 @@
 36| A nullifier stops double spending, and the server's request code is bound to the payment.
 42| Public state lives in a historic Merkle tree, a set of nullifiers, and a ticket map.
 48| The secret, the bundle size, and the Merkle path stay in the agent's private state, supplied as witnesses.
-55| The circuit checks the commitment, the Merkle root, the use count, and the nullifier. Ten simulator tests pass.
+55| The circuit checks the commitment, the Merkle root, the use count, and the nullifier. Nineteen tests pass, and the full flow also ran on a local Midnight chain with real proofs.
 62.5| Here is the live demo. The agent buys five calls. The ledger shows one unreadable commitment.
 69| Each call is paid by a proof. The server gets a fresh nullifier, and serves the request, without knowing the payer.
 79.5| Now let's cheat. Re-spending a credit fails. Claiming a hundred uses fails.
