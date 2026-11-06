@@ -36,6 +36,40 @@ The API server issues a random nonce per request; the agent picks a random `clai
 the server serves the call only if `tickets[nullifier] == sha256(nonce ‖ claim)`. Double spends fail in the circuit; because only the hash
 is on-chain, someone watching the chain cannot replay the ticket and take the response the agent paid for.
 
+## Private state and witnesses (what stays with the agent)
+
+| Witness (`contract/nightpass.compact`) | Supplied by (`src/simulator.mjs`) | Lives in | What becomes public |
+|---|---|---|---|
+| `localSecret()` | operator's private state | operator machine only | `publicKey(secret)`, sealed once at deploy |
+| `bundle()` → `{secret, uses}` | agent wallet (`AgentWallet`, fresh random secret per bundle) | agent only | nothing (only `H(H(secret), uses)` was inserted at purchase) |
+| `bundlePath()` | computed locally from the public tree: `ledger.bundles.findPathForLeaf(bundleCommitment(bundle))` | agent only | only the root it proves against (`checkRoot`) |
+| `useIndex()` | agent wallet counter | agent only | only `nullifier(secret, i)` |
+
+```compact
+export circuit redeem(requestTag: Bytes<32>): Bytes<32> {
+  const b = bundle(); const path = bundlePath(); const i = useIndex();            // private inputs
+  assert(path.leaf == bundleCommitment(b), "Path does not belong to this bundle");
+  assert(bundles.checkRoot(disclose(merkleTreePathRoot<16, Bytes<32>>(path))), "Bundle is not in the tree");
+  assert(i < b.uses, "Use index out of range for this bundle");
+  const nf = disclose(nullifier(b.secret, i));                                    // the only per-spend public value
+  assert(!spent.member(nf), "This credit was already spent");
+  spent.insert(nf); tickets.insert(nf, disclose(requestTag)); creditsRedeemed.increment(1);
+  return nf;
+}
+```
+
+Every `disclose()` is deliberate: the Merkle root, the nullifier and the request tag. The secret, the bundle size, the path
+and the index never leave the agent.
+
+```
+agent                          API server                     Midnight
+  | buy(ownerTag, N) ------------------------------------------> commitment H(ownerTag,N) into tree
+  | GET /v1/data -------------> 402 {nonce}
+  | redeem(sha256(nonce‖claim)) [ZK proof, witnesses local] ---> nullifier + ticket
+  | GET + X-Nightpass: nonce.nullifier.claim -> reads tickets from the indexer
+  |                            <- 200 (payer unknown)
+```
+
 ## Run it
 
 Requires Node 22 and the Compact toolchain (compiler 0.36.0).
@@ -43,7 +77,7 @@ Requires Node 22 and the Compact toolchain (compiler 0.36.0).
 ```bash
 npm install
 compact compile contract/nightpass.compact contract/managed     # real ZK keys (~10 s); add --skip-zk for fast iteration
-npm test                                                        # 19 tests (16 contract + 3 HTTP paywall)
+npm test                                                        # 21 tests (16 contract + 5 HTTP paywall)
 node src/demo.mjs                                               # end-to-end story in the local simulator
 npx vite --config vite.config.mjs                               # browser demo (web/) on localhost
 node tools/uitest.mjs <url>                                     # headless UI test (Playwright)
@@ -57,16 +91,16 @@ node tools/uitest.mjs <url>                                     # headless UI te
 
 Depth 16 allows 65,536 bundles per contract; raising it grows `redeem` linearly in the path length.
 
-## Tests (`test/*.test.mjs`, 19/19 passing)
+## Tests (`test/*.test.mjs`, 21/21 passing)
 operator-only issuance · exactly N spends per N-use bundle · double-spend rejected · unpaid bundle rejected ·
 inflated N rejected (commitment binding) · **no inflation through `issue()`** (agent paid for 1 can't spend 2) · empty bundles rejected ·
 forged Merkle path rejected · nullifiers unlinkable to commitments · operator never sees the secret · request-tag verification ·
 old bundles stay spendable after new issuances (historic roots) · self-serve `buy()` · operator-only / balance-checked `withdraw()` ·
-HTTP gate: 402 → 200, replay 403, **chain watcher can't front-run a paid call**, nonces expire.
+HTTP gate: 402 → 200, replay 403, **chain watcher can't front-run a paid call**, nonces expire, **concurrent copies of one header are served once**, a flood of unpaid requests can't evict a nonce, forged nonces refused.
 
 ## HTTP paywall (x402-style) — `src/api-gate.mjs`
 `GET /v1/data` → `402 {nonce}` → the agent runs `redeem(sha256(nonce ‖ claim))` → retries with `X-Nightpass: <nonce>.<nullifier>.<claim>` → `200`.
-Replaying the header gives `403`; an old nullifier can't pay a new nonce; nonces expire (default 2 min) and the pending set is bounded. The same gate reads `tickets` from the Midnight indexer in production (verified on a real chain, see below).
+Replaying the header gives `403`; an old nullifier can't pay a new nonce. Nonces are **stateless** (`expiry ‖ random ‖ HMAC(serverKey, …)`, default lifetime 10 min, long enough for proving + block inclusion + indexer lag), so the server stores nothing per `402` and a request flood cannot evict a nonce an agent is paying for; only served nonces are kept (until they expire), and a nonce being checked is locked, so concurrent copies of one header get one `200`. The same gate reads `tickets` from the Midnight indexer in production (verified on a real chain, see below).
 
 ## Deploying to a public network — `deploy/`
 Public Midnight networks run ledger 8, so `deploy/` pins Compact 0.31.1, compact-runtime 0.16.0, Midnight.js 4.1.1 and proof server 8.1.3
@@ -140,12 +174,13 @@ Same test on the **public preview network** (contract `402c9059ec4baf3daae5a7930
   `redeem` is visible. For real unlinkability, use a fresh fee wallet (or a relayer) for redemptions, not the wallet that ran `buy()`,
   and a network path that hides your IP.
 - The tree has 2^16 leaves; when it is full, a new contract must be deployed (bundles in the old one stay spendable).
+- Use a **fresh random secret per bundle** (the wallet code does): nullifiers are `H(secret, i)`, so two bundles bought with the same secret share nullifiers and the second one's credits are already spent.
 - `buy()` uses an unshielded NIGHT payment, so the purchase itself is public (who bought how many); unlinkability starts after it. Roadmap: shielded payment.
 
 ## Roadmap
 1. Browser UI with Lace wallet against the preview deployment.
 2. Shielded payment in `buy()` so the purchase is private too.
-3. x402 integration: an `X-Nightpass` header carrying the nullifier, verified by the API against the indexer.
+3. Package the gate (already verified against the preview indexer) as drop-in middleware next to x402 (Express / Hono / Workers).
 4. Bundle expiry and per-endpoint credit classes.
 
 ## Built by
