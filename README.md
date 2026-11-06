@@ -8,7 +8,7 @@ endpoint, how often, and when. For an agent that is a full leak of its strategy.
 zero-knowledge proof on Midnight. The provider learns *"this call was paid by a valid, unspent
 credit"* — never which bundle, which buyer, or how many credits are left.
 
-**Live demo:** https://nightpass-demo.nightshift-labs.workers.dev (the compiled contract running in the browser on the local Midnight simulator) · **Live chain view:** https://nightpass-demo.nightshift-labs.workers.dev/live/ (reads the deployed contracts from the public preview indexer and decodes their ledger in the browser) · Slides: `docs/nightpass-slides.pdf`
+**Live demo:** https://nightpass-demo.nightshift-labs.workers.dev (the compiled contract running in the browser on the local Midnight simulator) · **Live chain view:** https://nightpass-demo.nightshift-labs.workers.dev/live/ (reads the deployed contracts from the public preview indexer and decodes their ledger in the browser) · Slides: [`docs/nightpass-slides.pdf`](docs/nightpass-slides.pdf) · Video (2.5 min, voice-over + subtitles): [`docs/nightpass-demo.mp4`](docs/nightpass-demo.mp4)
 
 ## How it works (dual-ledger model)
 
