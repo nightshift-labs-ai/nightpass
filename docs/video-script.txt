@@ -7,10 +7,10 @@
 42| Public state lives in a historic Merkle tree, a set of nullifiers, and a ticket map.
 48| The secret, the bundle size, and the Merkle path stay in the agent's private state, supplied as witnesses.
 55| The circuit builds the commitment itself, checks the Merkle root, the use count, and the nullifier. Nineteen tests pass.
-62.5| And it runs on a real Midnight chain: issue, two anonymous redeems, a rejected double spend, a self-serve purchase in NIGHT, and a withdrawal, all with real proofs.
+62.5| And it is live on the public Midnight preview network: issue, two anonymous redeems, a rejected double spend, a self-serve purchase in NIGHT, and a withdrawal, all with real proofs.
 74.5| Here is the live demo. The agent buys five calls. The ledger shows one unreadable commitment.
 81| Each call is paid by a proof. The server gets a fresh nullifier, and serves the request, without knowing the payer.
 91.5| Now let's cheat. Re-spending a credit fails. Claiming a hundred uses fails.
 101| And spending a bundle nobody paid for is rejected by the circuit too.
 107.5| Who pays? Providers that sell data to agents. Nightpass plugs in next to x four oh two payments, as one extra header.
-121.5| Next: deployment on the Midnight preview network, a shielded purchase, and server middleware. Nightpass is open source, under Apache 2.0.
+121.5| Next: a Lace wallet in the browser, a shielded purchase, and server middleware. Nightpass is open source, under Apache 2.0.

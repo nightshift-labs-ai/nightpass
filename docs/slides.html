@@ -40,16 +40,16 @@ img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
 <li class="g">✔ only the operator can <code>issue()</code> / <code>withdraw()</code>; <code>buy()</code> must pay N × price NIGHT</li></ul>
 <p class="m">19 tests (16 contract + 3 HTTP paywall) cover every rule plus unlinkability, front-running and request binding — all passing.</p></div>
 
-<div class="s"><h2>Verified on a real Midnight chain</h2><table>
-<tr><th>Step (real ZK proofs, local Midnight node 1.0 + indexer + proof server)</th><th>Result</th></tr>
-<tr><td>deploy, price 1000 / credit</td><td class="g">contract 7e9c09bf…</td></tr>
-<tr><td><code>issue(ownerTag, 3)</code></td><td class="g">block 71</td></tr>
-<tr><td><code>redeem</code> credit #0</td><td class="g">block 75</td></tr>
+<div class="s"><h2>Live on the public Midnight preview network</h2><table>
+<tr><th>Step (real ZK proofs, preview network)</th><th>Result</th></tr>
+<tr><td>deploy, price 1000 / credit</td><td class="g">contract 152c8498…56b3</td></tr>
+<tr><td><code>issue(ownerTag, 3)</code></td><td class="g">block 1618076</td></tr>
+<tr><td><code>redeem</code> credit #0</td><td class="g">block 1618081</td></tr>
 <tr><td><code>redeem</code> credit #0 again</td><td class="k">rejected: already spent</td></tr>
-<tr><td><code>redeem</code> credit #1</td><td class="g">block 79</td></tr>
-<tr><td><code>buy(ownerTag, 2)</code> paying 2000 NIGHT units</td><td class="g">block 82</td></tr>
-<tr><td><code>withdraw(1500)</code> (in-circuit balance check)</td><td class="g">block 86</td></tr></table>
-<p class="m" style="font-size:20px">HTTP paywall reading the indexer: 402 → on-chain redeem → <span class="g">200</span>; ticket replayed without the claim → 402; replay → 403.<br>Transcripts + tx ids: docs/localnet-run.txt, docs/gate-e2e-localnet.json.</p></div>
+<tr><td><code>redeem</code> credit #1</td><td class="g">block 1618085</td></tr>
+<tr><td><code>buy(ownerTag, 2)</code> paying 2000 NIGHT units</td><td class="g">block 1618089</td></tr>
+<tr><td><code>withdraw(1500)</code> (in-circuit balance check)</td><td class="g">block 1618093</td></tr></table>
+<p class="m" style="font-size:20px">Also on a local Midnight chain: HTTP paywall reading the indexer: 402 → on-chain redeem → <span class="g">200</span>; ticket replayed without the claim → 402; replay → 403.<br>Tx ids: docs/preview-run.txt · local runs: docs/localnet-run.txt, docs/gate-e2e-localnet.json.</p></div>
 
 <div class="s"><h2>Demo</h2><img src="demo-ui.png"><p class="m" style="font-size:20px">Live: nightpass-demo.nightshift-labs.workers.dev — the compiled contract running in the browser (local Midnight simulator), with three "try to cheat" buttons.</p></div>
 
@@ -60,7 +60,7 @@ img{max-width:100%;max-height:470px;border-radius:12px;border:1px solid #2a3060}
 <li><b>Model:</b> providers keep 100% of the bundle price; optional hosted verifier.</li></ul></div>
 
 <div class="s"><h2>Roadmap &amp; honest limits</h2><ul>
-<li>Next: public preview deploy (local-chain run done) + Lace wallet in the UI.</li>
+<li>Next: Lace wallet in the UI against the live preview contract.</li>
 <li>Shielded payment inside the purchase, so buying is private too.</li>
 <li>x402 integration: verify the nullifier via the indexer in the API middleware.</li>
 <li>Bundle expiry, per-endpoint credit classes.</li>
