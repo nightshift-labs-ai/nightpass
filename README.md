@@ -43,6 +43,14 @@ npx vite --config vite.config.mjs                               # browser demo (
 node tools/uitest.mjs <url>                                     # headless UI test (Playwright)
 ```
 
+## Circuit size (measured, `compact compile` without `--skip-zk`)
+| Circuit | ZKIR instructions | Prover key | Verifier key |
+|---|---|---|---|
+| `issue` | 114 | 11.3 MB | 2.1 kB |
+| `redeem` (Merkle depth 16 + 2 hashes + set/map updates) | 246 | 22.6 MB | 2.1 kB |
+
+Depth 16 allows 65,536 bundles per contract; raising it grows `redeem` linearly in the path length.
+
 ## Tests (`test/nightpass.test.mjs`, all passing)
 operator-only issuance · exactly N spends per N-use bundle · double-spend rejected · unpaid bundle rejected ·
 inflated N rejected (commitment binding) · forged Merkle path rejected · nullifiers unlinkable to commitments ·
