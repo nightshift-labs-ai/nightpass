@@ -1,0 +1,48 @@
+{
+  "network": "preview",
+  "address": "152c84984494587b0a2b58b3ab2e17eae612c1be5ce7c8fc254bfdf7134056b3",
+  "steps": [
+    {
+      "step": "issue(ownerTag, 3)",
+      "block": "1618076",
+      "txId": "0037d1122d3e6ffac8af4a14023aa2a0e727f92cfc0ae870369eddf1eb0817ae65"
+    },
+    {
+      "step": "redeem(requestTag) #0",
+      "block": "1618081",
+      "txId": "000407782deddcf904221af9237f995122a803bd2164b4b898860bfa767904e935"
+    },
+    {
+      "step": "redeem #0 again (double spend)",
+      "result": "rejected: This credit was already spent"
+    },
+    {
+      "step": "redeem(requestTag) #1",
+      "block": "1618085",
+      "txId": "00fee00c3bfc53b008b3515df20b21dc4d8dd19966237f6f1d225b2a2da69ce209"
+    },
+    {
+      "step": "buy(ownerTag, 2) paying 2000 NIGHT units",
+      "block": "1618089",
+      "txId": "00af888e7d7cdc395986996d9f127dec2b6d50dec4e8a5237cf638d10289cc53f2"
+    },
+    {
+      "step": "contract balance after buy()",
+      "balance": "[]"
+    },
+    {
+      "step": "withdraw(1500, operator)",
+      "block": "1618093",
+      "txId": "00a4b52e308a975fce1d275f16d64d9b08e007d602cbbe21218c444cdadf20cdae"
+    },
+    {
+      "step": "contract balance after withdraw()",
+      "balance": "[]"
+    }
+  ],
+  "ledger": {
+    "bundlesIssued": "2",
+    "creditsRedeemed": "2"
+  },
+  "at": "2026-11-06T02:12:37.264Z"
+}

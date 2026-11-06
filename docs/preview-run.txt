@@ -1,0 +1,11 @@
+[preview] wallet synced: mn_addr_preview1c387xyd9x5485cg8cyd094rsay98wnfz4kntvqdk9hvw57j0qhpqk6mdct
+registered 1 NIGHT UTXO(s) for DUST generation
+DUST (SPECK): 3265464999999999
+deployed Nightpass at 152c84984494587b0a2b58b3ab2e17eae612c1be5ce7c8fc254bfdf7134056b3
+issue(ownerTag, 3) landed in block 1618076 (tx 0037d1122d3e6ffac8af4a14023aa2a0e727f92cfc0ae870369eddf1eb0817ae65)
+redeem(requestTag) #0 landed in block 1618081 (tx 000407782deddcf904221af9237f995122a803bd2164b4b898860bfa767904e935)
+double spend of credit #0: rejected: This credit was already spent
+redeem(requestTag) #1 landed in block 1618085 (tx 00fee00c3bfc53b008b3515df20b21dc4d8dd19966237f6f1d225b2a2da69ce209)
+buy(ownerTag, 2) paying 2000 NIGHT units landed in block 1618089 (tx 00af888e7d7cdc395986996d9f127dec2b6d50dec4e8a5237cf638d10289cc53f2)
+withdraw(1500, operator) landed in block 1618093 (tx 00a4b52e308a975fce1d275f16d64d9b08e007d602cbbe21218c444cdadf20cdae)
+on-chain: bundlesIssued=2 creditsRedeemed=2 spentNullifiers=2 tickets=2

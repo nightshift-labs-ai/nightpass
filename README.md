@@ -73,6 +73,21 @@ Public Midnight networks run ledger 8, so `deploy/` pins Compact 0.31.1, compact
 (the root project uses the newest compiler, 0.36, for local tests). `deploy/src/deploy.mjs` syncs a wallet, registers NIGHT for DUST,
 deploys (default `preview`), then runs issue → redeem → rejected double spend → redeem → buy → withdraw on-chain. `deploy/test-ledger8.sh` runs the 16 contract tests on the ledger-8 build (all pass).
 
+## Live on the public Midnight `preview` network
+Contract **`152c84984494587b0a2b58b3ab2e17eae612c1be5ce7c8fc254bfdf7134056b3`** (deployed with `deploy/src/deploy.mjs`, real proofs, Compact 0.31.1 / ledger 8).
+
+| Step | Block on preview |
+|---|---|
+| `issue(ownerTag, 3)` | 1618076 |
+| `redeem` credit #0 | 1618081 |
+| `redeem` credit #0 again (double spend) | rejected: "This credit was already spent" |
+| `redeem` credit #1 | 1618085 |
+| `buy(ownerTag, 2)` paying 2000 NIGHT units | 1618089 |
+| `withdraw(1500, operator)` | 1618093 |
+| final public ledger | `bundlesIssued=2 creditsRedeemed=2` |
+
+Tx ids: [`docs/preview-run.txt`](docs/preview-run.txt), [`docs/preview-deployment.json`](docs/preview-deployment.json).
+
 ## Verified on a real Midnight chain (local `undeployed` network, real ZK proofs)
 `deploy/src/deploy.mjs` with `MIDNIGHT_NETWORK=undeployed` ran the full flow against a local Midnight node 1.0.0 + indexer 4.3.3 +
 proof server 8.1.3 (the versions in Midnight's own local-network compose file), with real proofs for every call.
@@ -114,7 +129,7 @@ real HTTP requests with on-chain `redeem` transactions ([`docs/gate-e2e-localnet
 - `buy()` uses an unshielded NIGHT payment, so the purchase itself is public (who bought how many); unlinkability starts after it. Roadmap: shielded payment.
 
 ## Roadmap
-1. Public `preview` deployment (local-chain run done) + browser UI with Lace wallet.
+1. Browser UI with Lace wallet against the preview deployment.
 2. Shielded payment in `buy()` so the purchase is private too.
 3. x402 integration: an `X-Nightpass` header carrying the nullifier, verified by the API against the indexer.
 4. Bundle expiry and per-endpoint credit classes.
