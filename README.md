@@ -8,7 +8,7 @@ endpoint, how often, and when. For an agent that is a full leak of its strategy.
 
 > **Name note:** this project was called *Nightpass* until Nov 6, 2026. We renamed it because another Midnight Buildathon team already has an
 > unrelated project called *NightPass* (Wave 1, membership access control). Hash domain tags inside the contract (`"nightpass:*"`) and a few
-> deploy-script storage names keep the old codename so the contract already deployed on preview stays valid.
+> deploy-script storage names (and the compiled `deploy/managed` artifacts that match the deployed verifier keys) keep the old codename so the contract already deployed on preview stays valid.
 
 **Punchcard** lets an agent buy a bundle of *N* calls once, then pay each call with a
 zero-knowledge proof on Midnight. The provider learns *"this call was paid by a valid, unspent
