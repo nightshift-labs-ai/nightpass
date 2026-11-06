@@ -20,8 +20,8 @@ const api = {
 };
 
 const agent = new AgentWallet();
-const { commitment } = agent.newBundle(3);
-await sim.issue(commitment); // after the agent paid off-chain/on-chain for 3 calls
+const req = agent.newBundle(3), { commitment } = req;
+await sim.issue(req); // agent paid for 3 calls; it sends only ownerTag = H(secret), the circuit builds the commitment
 console.log("2) Agent bought a 3-call bundle. On-chain the operator sees only commitment", short(commitment));
 
 for (let i = 1; i <= 4; i++) {

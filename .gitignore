@@ -4,3 +4,5 @@ dist/
 deploy/node_modules/
 deploy/managed/
 .l8test/
+deploy/midnight-level-db/
+deploy/deployment-*.json

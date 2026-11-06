@@ -23,9 +23,9 @@ function render() {
 
 $("buy").onclick = async () => {
   const n = Number($("n").value);
-  const { commitment } = wallet.newBundle(n);
-  await sim.issue(commitment); commitments.push(commitment);
-  log(`Agent paid for <b>${n}</b> calls → operator ran <code>issue()</code>; the chain stores only commitment <code>${short(commitment)}</code>.`);
+  const req = wallet.newBundle(n), { commitment } = req;
+  await sim.issue(req); commitments.push(commitment);
+  log(`Agent paid for <b>${n}</b> calls and sent only its owner tag <code>${short(req.owner)}</code> → operator ran <code>issue(ownerTag, ${n})</code>; the circuit built commitment <code>${short(commitment)}</code>, the only thing the chain stores.`);
   render();
 };
 
