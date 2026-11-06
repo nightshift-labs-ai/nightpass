@@ -19,7 +19,8 @@ credit"* — never which bundle, which buyer, or how many credits are left.
 | Counters | `bundlesIssued`, `creditsRedeemed` | remaining credits |
 
 Circuits (`contract/nightpass.compact`):
-- `issue(commitment)` — operator only (checked against a hashed operator key); adds a paid bundle.
+- `buy(commitment, uses)` — **self-serve**: the agent pays `uses × pricePerCredit` NIGHT into the contract (`receiveUnshielded`) and adds its own commitment; the circuit checks the commitment really encodes `uses`.
+- `issue(commitment)` — operator only (checked against a hashed operator key); adds a bundle paid off-chain (e.g. via x402).
 - `redeem(requestTag)` — the agent proves in ZK, using witnesses `bundle()`, `bundlePath()`, `useIndex()`:
   1. the path leaf equals `bundleCommitment(bundle)` (so `N` can't be inflated),
   2. the path root is a current or past root of the bundle tree (`checkRoot`),
@@ -37,7 +38,7 @@ Requires Node 22 and the Compact toolchain (compiler 0.36.0).
 ```bash
 npm install
 compact compile contract/nightpass.compact contract/managed     # real ZK keys (~10 s); add --skip-zk for fast iteration
-npm test                                                        # 11 tests (10 contract + 1 HTTP paywall)
+npm test                                                        # 13 tests (12 contract + 1 HTTP paywall)
 node src/demo.mjs                                               # end-to-end story in the local simulator
 npx vite --config vite.config.mjs                               # browser demo (web/) on localhost
 node tools/uitest.mjs <url>                                     # headless UI test (Playwright)
@@ -63,18 +64,18 @@ Replaying the header gives `403`; an old nullifier can't pay a new nonce. In pro
 ## Deploying to a public network — `deploy/`
 Public Midnight networks run ledger 8, so `deploy/` pins Compact 0.31.1, compact-runtime 0.16.0, Midnight.js 4.1.1 and proof server 8.1.3
 (the root project uses the newest compiler, 0.36, for local tests). `deploy/src/deploy.mjs` syncs a wallet, registers NIGHT for DUST,
-deploys to `preview`, then runs one `issue` and one `redeem` on-chain. `deploy/test-ledger8.sh` runs the same 10 contract tests on the ledger-8 build (all pass).
+deploys to `preview`, then runs one `issue` and one `redeem` on-chain. `deploy/test-ledger8.sh` runs the same 12 contract tests on the ledger-8 build (all pass).
 
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from
   then on. Anonymity set = all bundles issued before the root the agent proves against (agents should prove
   against a recent root).
 - The disclosed Merkle root and the request tag are public; the tag should be a random nonce.
-- Payment for the bundle itself is out of scope of this contract (roadmap: shielded token payment in `issue`).
+- `buy()` uses an unshielded NIGHT payment, so the purchase itself is public (who bought how many); unlinkability starts after it. Roadmap: shielded payment.
 
 ## Roadmap
 1. Testnet deployment + browser UI with Lace wallet.
-2. Shielded payment inside `buy()` so purchase is private too.
+2. Shielded payment in `buy()` so the purchase is private too; operator withdrawal circuit.
 3. x402 integration: an `X-Nightpass` header carrying the nullifier, verified by the API against the indexer.
 4. Bundle expiry and per-endpoint credit classes.
 

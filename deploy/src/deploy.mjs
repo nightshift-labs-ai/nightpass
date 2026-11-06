@@ -59,7 +59,7 @@ const witnesses = {
 };
 const compiled = CompiledContract.withCompiledFileAssets(CompiledContract.withWitnesses(CompiledContract.make("nightpass", Contract), witnesses), DIR);
 const operatorSecret = randomBytes(32).toString("hex");
-const deployed = await deployContract(providers, { compiledContract: compiled, privateStateId: "nightpass", initialPrivateState: { secret: operatorSecret, next: 0 } });
+const deployed = await deployContract(providers, { compiledContract: compiled, args: [1000n], privateStateId: "nightpass", initialPrivateState: { secret: operatorSecret, next: 0 } });
 const address = deployed.deployTxData.public.contractAddress;
 console.log(`deployed Nightpass at ${address}`);
 const iss = await deployed.callTx.issue(pureCircuits.bundleCommitment(bundle));

@@ -22,11 +22,11 @@ const witnesses = {
 };
 
 export class NightpassSim {
-  static async deploy(operatorSecret = rand32()) {
+  static async deploy(operatorSecret = rand32(), price = 1000n) {
     const sim = new NightpassSim();
     sim.contract = new Contract(witnesses);
     sim.address = rt.sampleContractAddress();
-    const init = await sim.contract.initialState(rt.createConstructorContext({ secret: operatorSecret }, "0".repeat(64)));
+    const init = await sim.contract.initialState(rt.createConstructorContext({ secret: operatorSecret }, "0".repeat(64)), price);
     sim.state = init.currentContractState.data;
     sim.operatorSecret = operatorSecret;
     return sim;
@@ -55,6 +55,12 @@ export class AgentWallet {
     const b = { secret: rand32(), uses: BigInt(uses) };
     this.bundles.push({ bundle: b, next: 0n });
     return { bundle: b, commitment: pureCircuits.bundleCommitment(b) };
+  }
+  // self-serve: pay uses * price NIGHT in-contract and register the commitment (no operator step)
+  async buy(sim, uses) {
+    const { bundle, commitment } = this.newBundle(uses);
+    await sim.call("buy", { secret: new Uint8Array(32), spend: { bundle, index: 0n } }, commitment, BigInt(uses));
+    return commitment;
   }
   remaining() { return this.bundles.reduce((s, x) => s + (x.bundle.uses - x.next), 0n); }
   // pick a bundle with credit left; returns the private spend data for the witness

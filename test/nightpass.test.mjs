@@ -120,3 +120,22 @@ test("a forged Merkle path (fake tree) is rejected by the circuit", async () => 
   });
   await rejects((async () => evil.impureCircuits.redeem(sim.ctx("redeem", {}), tag("x")))(), /not in the tree/);
 });
+
+test("self-serve buy(): agent pays in-contract, no operator step, credits spendable", async () => {
+  const sim = await NightpassSim.deploy(rand32(), 250n);
+  const w = new AgentWallet();
+  await w.buy(sim, 3);
+  assert.equal(sim.ledger.bundlesIssued, 1n);
+  assert.equal(sim.ledger.pricePerCredit, 250n);
+  for (let i = 0; i < 3; i++) await w.pay(sim, tag(`b${i}`));
+  assert.equal(sim.ledger.creditsRedeemed, 3n);
+});
+
+test("buy() rejects a commitment that does not match the paid bundle size", async () => {
+  const sim = await NightpassSim.deploy();
+  const w = new AgentWallet();
+  const { bundle } = w.newBundle(100);                       // commitment for 100 uses …
+  const small = pureCircuits.bundleCommitment(bundle);
+  await rejects((async () => sim.call("buy", { secret: new Uint8Array(32), spend: { bundle, index: 0n } }, small, 1n))(), /does not match/); // … paying for 1
+  assert.equal(sim.ledger.bundlesIssued, 0n);
+});

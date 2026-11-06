@@ -17,6 +17,7 @@ export ledger spent: Set<Bytes<32>>;                 // nullifiers of used credi
 export ledger tickets: Map<Bytes<32>, Bytes<32>>;    // nullifier -> request tag it paid for
 export ledger bundlesIssued: Counter;
 export ledger creditsRedeemed: Counter;
+export sealed ledger pricePerCredit: Uint<64>;       // NIGHT (smallest unit) per credit for self-serve buy()
 
 // A bundle lives only in the agent's private state.
 export struct Bundle {
@@ -30,13 +31,26 @@ witness bundle(): Bundle;                               // which bundle the agen
 witness bundlePath(): MerkleTreePath<16, Bytes<32>>;    // its Merkle path
 witness useIndex(): Uint<16>;                           // which of its N uses
 
-constructor() {
+constructor(price: Uint<64>) {
   operator = disclose(publicKey(localSecret()));
+  pricePerCredit = disclose(price);
 }
 
 // Operator records a paid bundle. Only the commitment becomes public.
 export circuit issue(commitment: Bytes<32>): [] {
   assert(publicKey(localSecret()) == operator, "Only the operator can issue bundles");
+  bundles.insert(disclose(commitment));
+  bundlesIssued.increment(1);
+}
+
+// Self-serve purchase: the agent pays uses * price in NIGHT to the contract and adds its own commitment.
+// The commitment hides the secret; `uses` is bound inside it and also disclosed here so the price can be checked.
+export circuit buy(commitment: Bytes<32>, uses: Uint<16>): [] {
+  assert(uses > 0, "Buy at least one credit");
+  const b = bundle();
+  assert(b.uses == uses, "Bundle size does not match");
+  assert(bundleCommitment(b) == commitment, "Commitment does not match the bundle");
+  receiveUnshielded(nativeToken(), (disclose(uses) as Uint<64>) * pricePerCredit as Uint<128>);
   bundles.insert(disclose(commitment));
   bundlesIssued.increment(1);
 }
