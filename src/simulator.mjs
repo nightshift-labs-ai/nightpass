@@ -32,8 +32,11 @@ export class NightpassSim {
     return sim;
   }
   ctx(circuitId, privateState) {
-    return rt.createCircuitContext({ circuitId, contractAddress: this.address, coinPublicKeyOrZswapState: "0".repeat(64),
-      contractState: this.state, privateState });
+    // compact-runtime >= 0.19 takes one options object; 0.16 (ledger 8, public networks) takes positional args.
+    return rt.createCircuitContext.length >= 4
+      ? rt.createCircuitContext(this.address, "0".repeat(64), this.state, privateState)
+      : rt.createCircuitContext({ circuitId, contractAddress: this.address, coinPublicKeyOrZswapState: "0".repeat(64),
+          contractState: this.state, privateState });
   }
   async call(name, privateState, ...args) {
     const r = await this.contract.impureCircuits[name](this.ctx(name, privateState), ...args);

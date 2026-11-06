@@ -64,7 +64,7 @@ test("inflating the use count of a real bundle fails (commitment binds N)", asyn
     bundlePath: ({ privateState }) => [privateState, path],
     useIndex: ({ privateState }) => [privateState, 50n],
   });
-  await rejects(evil.impureCircuits.redeem(sim.ctx("redeem", {}), tag("x")), /does not belong/);
+  await rejects((async () => evil.impureCircuits.redeem(sim.ctx("redeem", {}), tag("x")))(), /does not belong/);
 });
 
 test("redemptions are unlinkable: on-chain data never contains the bundle commitment", async () => {
@@ -118,5 +118,5 @@ test("a forged Merkle path (fake tree) is rejected by the circuit", async () => 
     bundlePath: ({ privateState }) => [privateState, forged],
     useIndex: ({ privateState }) => [privateState, 0n],
   });
-  await rejects(evil.impureCircuits.redeem(sim.ctx("redeem", {}), tag("x")), /not in the tree/);
+  await rejects((async () => evil.impureCircuits.redeem(sim.ctx("redeem", {}), tag("x")))(), /not in the tree/);
 });

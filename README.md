@@ -55,7 +55,7 @@ Replaying the header gives `403`; an old nullifier can't pay a new nonce. In pro
 ## Deploying to a public network — `deploy/`
 Public Midnight networks run ledger 8, so `deploy/` pins Compact 0.31.1, compact-runtime 0.16.0, Midnight.js 4.1.1 and proof server 8.1.3
 (the root project uses the newest compiler, 0.36, for local tests). `deploy/src/deploy.mjs` syncs a wallet, registers NIGHT for DUST,
-deploys to `preview`, then runs one `issue` and one `redeem` on-chain.
+deploys to `preview`, then runs one `issue` and one `redeem` on-chain. `deploy/test-ledger8.sh` runs the same 10 contract tests on the ledger-8 build (all pass).
 
 ## Privacy notes and limits (honest)
 - The operator knows which commitment it issued to which buyer at purchase time; unlinkability holds from

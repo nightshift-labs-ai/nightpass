@@ -3,3 +3,4 @@ contract/managed/
 dist/
 deploy/node_modules/
 deploy/managed/
+.l8test/
