@@ -139,3 +139,9 @@ test("buy() rejects a commitment that does not match the paid bundle size", asyn
   await rejects((async () => sim.call("buy", { secret: new Uint8Array(32), spend: { bundle, index: 0n } }, small, 1n))(), /does not match/); // … paying for 1
   assert.equal(sim.ledger.bundlesIssued, 0n);
 });
+
+test("only the operator can withdraw", async () => {
+  const sim = await NightpassSim.deploy();
+  const to = { bytes: rand32() };
+  await rejects((async () => sim.call("withdraw", { secret: rand32() }, 1n, to))(), /Only the operator/);
+});

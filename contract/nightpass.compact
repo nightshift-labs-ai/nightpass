@@ -55,6 +55,13 @@ export circuit buy(commitment: Bytes<32>, uses: Uint<16>): [] {
   bundlesIssued.increment(1);
 }
 
+// Operator withdraws collected NIGHT to its own address.
+export circuit withdraw(amount: Uint<128>, to: UserAddress): [] {
+  assert(publicKey(localSecret()) == operator, "Only the operator can withdraw");
+  assert(unshieldedBalanceGte(nativeToken(), disclose(amount)), "Not enough NIGHT in the contract");
+  sendUnshielded(nativeToken(), disclose(amount), right<ContractAddress, UserAddress>(disclose(to)));
+}
+
 // Agent spends one credit for one API request, anonymously.
 export circuit redeem(requestTag: Bytes<32>): Bytes<32> {
   const b = bundle();
