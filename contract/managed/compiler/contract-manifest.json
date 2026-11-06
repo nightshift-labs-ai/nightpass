@@ -1,0 +1,56 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.36.0",
+  "compiler-commit": "b5d9e4dfc532fe47011c4f6296e254f4853eb469",
+  "language-version": "0.28.0",
+  "runtime-version": "0.21.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 8031,
+      "hash": "417e03f74cdfd6a72edcecb74ed2a09263c87bb66030c5fbc8be33f0cb0d12d5"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 5699,
+      "hash": "d9fd249e82874340f233c9eea65a0c0ffb77fa1f13909b27af85692147ec82f0"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 118626,
+      "hash": "1668936441689a67fa5b803bd553141d8530772e5825bb882ced9fb4ddd990e5"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 4606,
+      "hash": "0ef5f67644da455cf10d9ea9ac939e922c7361de34d166cbb23160ba3a11a860"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "buy.zkir": {
+      "type": "file",
+      "size": 4647,
+      "hash": "bf3fa60a68057e15d4678a316839de542868df0e8c612448f66291eb1752eeb5"
+    },
+    "issue.zkir": {
+      "type": "file",
+      "size": 4490,
+      "hash": "2d75946cf9a91e4579c5d365afb840463333b068de2e4e02ede3590865b43913"
+    },
+    "redeem.zkir": {
+      "type": "file",
+      "size": 15559,
+      "hash": "cb0e1991c5a1855c047a97616079cd8279be1a967981efc3211406fb7fab4167"
+    },
+    "withdraw.zkir": {
+      "type": "file",
+      "size": 5497,
+      "hash": "5bc60b92ffbd5bb663340a75279754e377427d517beb77b2c6ad8dc322416551"
+    }
+  }
+}

@@ -1,8 +1,8 @@
 node_modules/
-contract/managed/
+contract/managed/keys/
 dist/
 deploy/node_modules/
-deploy/managed/
+deploy/managed/keys/
 .l8test/
 deploy/midnight-level-db/
 deploy/deployment-*.json

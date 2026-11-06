@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "compile": "compact compile --skip-zk contract/nightpass.compact contract/managed",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "demo": "node src/demo.mjs",
+    "web": "vite --config vite.config.mjs",
+    "build": "vite build && cd deploy && vite build -c vite.live.config.mjs"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.21.0"
