@@ -8,4 +8,5 @@ if [ -n "${ENV_FILE:-}" ]; then
   export CLOUDFLARE_API_TOKEN="$(getenv CLOUDFLARE_API_TOKEN)" CLOUDFLARE_ACCOUNT_ID="$(getenv CLOUDFLARE_ACCOUNT_ID)"
 fi
 npx vite build >/dev/null
+(cd deploy && npx vite build -c vite.live.config.mjs >/dev/null)   # live page -> dist/live
 npx wrangler deploy 2>&1 | grep -v -i token | tail -4

@@ -8,7 +8,7 @@ endpoint, how often, and when. For an agent that is a full leak of its strategy.
 zero-knowledge proof on Midnight. The provider learns *"this call was paid by a valid, unspent
 credit"* — never which bundle, which buyer, or how many credits are left.
 
-**Live demo:** https://nightpass-demo.nightshift-labs.workers.dev (the compiled contract running in the browser on the local Midnight simulator) · Slides: `docs/nightpass-slides.pdf`
+**Live demo:** https://nightpass-demo.nightshift-labs.workers.dev (the compiled contract running in the browser on the local Midnight simulator) · **Live chain view:** https://nightpass-demo.nightshift-labs.workers.dev/live/ (reads the deployed contracts from the public preview indexer and decodes their ledger in the browser) · Slides: `docs/nightpass-slides.pdf`
 
 ## How it works (dual-ledger model)
 
@@ -87,6 +87,13 @@ Contract **`152c84984494587b0a2b58b3ab2e17eae612c1be5ce7c8fc254bfdf7134056b3`** 
 | final public ledger | `bundlesIssued=2 creditsRedeemed=2` |
 
 Tx ids: [`docs/preview-run.txt`](docs/preview-run.txt), [`docs/preview-deployment.json`](docs/preview-deployment.json).
+
+**Live chain view** — https://nightpass-demo.nightshift-labs.workers.dev/live/ (`deploy/live-web/`, built by `deploy.sh`):
+the browser queries `indexer.preview.midnight.network` (GraphQL `contractAction`), deserializes the contract state with
+`compact-runtime` 0.16 and decodes it with the compiled ledger-8 contract (`deploy/managed`). It shows both deployed
+contracts' counters, Merkle root of bundle commitments, every spent nullifier → request ticket, the sealed operator key, and
+the contract's NIGHT balance (500 = 2000 paid by `buy()` − 1500 withdrawn). A "check a nullifier" box runs the same
+`spent.member()` test the API gate uses. Headless test: `node tools/livetest.mjs <url>/live/`.
 
 ## Verified on a real Midnight chain (local `undeployed` network, real ZK proofs)
 `deploy/src/deploy.mjs` with `MIDNIGHT_NETWORK=undeployed` ran the full flow against a local Midnight node 1.0.0 + indexer 4.3.3 +
