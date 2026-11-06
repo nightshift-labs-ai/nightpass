@@ -1,5 +1,7 @@
 # Nightpass — unlinkable prepaid API credits for AI agents (Midnight)
 
+This project is built on the Midnight Network.
+
 AI agents increasingly pay per API call (x402-style micropayments). Today every paid call is
 linkable: the API provider — and anyone watching the chain — sees which wallet called which
 endpoint, how often, and when. For an agent that is a full leak of its strategy.
