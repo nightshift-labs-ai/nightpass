@@ -1,0 +1,60 @@
+1
+00:00:00,500 --> 00:00:05,444
+Nightpass: private, prepaid credits for autonomous agents that buy data services, built on Midnight.
+
+2
+00:00:08,500 --> 00:00:13,757
+Software agents now pay for each service call, one by one. But every paid call is linkable.
+
+3
+00:00:14,000 --> 00:00:18,352
+The provider sees which agent called what, and when. For an agent, that log is its strategy.
+
+4
+00:00:21,500 --> 00:00:26,502
+With Nightpass, an agent buys a bundle of calls once. The chain stores only a hiding commitment.
+
+5
+00:00:28,500 --> 00:00:33,955
+Each call is then paid with a zero knowledge proof: I own an unused credit, in some bundle, in this tree.
+
+6
+00:00:36,000 --> 00:00:40,689
+A nullifier stops double spending, and the server's request code is bound to the payment.
+
+7
+00:00:42,000 --> 00:00:46,259
+Public state lives in a historic Merkle tree, a set of nullifiers, and a ticket map.
+
+8
+00:00:48,000 --> 00:00:53,478
+The secret, the bundle size, and the Merkle path stay in the agent's private state, supplied as witnesses.
+
+9
+00:00:55,000 --> 00:01:00,420
+The circuit checks the commitment, the Merkle root, the use count, and the nullifier. Ten simulator tests pass.
+
+10
+00:01:02,500 --> 00:01:07,270
+Here is the live demo. The agent buys five calls. The ledger shows one unreadable commitment.
+
+11
+00:01:09,000 --> 00:01:14,524
+Each call is paid by a proof. The server gets a fresh nullifier, and serves the request, without knowing the payer.
+
+12
+00:01:19,500 --> 00:01:23,457
+Now let's cheat. Re-spending a credit fails. Claiming a hundred uses fails.
+
+13
+00:01:29,000 --> 00:01:32,168
+And spending a bundle nobody paid for is rejected by the circuit too.
+
+14
+00:01:35,500 --> 00:01:41,570
+Who pays? Providers that sell data to agents. Nightpass plugs in next to x402 payments, as one extra header.
+
+15
+00:01:49,500 --> 00:01:56,592
+Next: deployment on the Midnight preview network, a shielded purchase, and server middleware. Nightpass is open source, under Apache 2.0.
+

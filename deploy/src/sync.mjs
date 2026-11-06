@@ -1,0 +1,10 @@
+import "./config.mjs";
+import { unshieldedToken } from "@midnight-ntwrk/midnight-js-protocol/ledger";
+import { deriveWalletKeys, readSeed } from "./keys.mjs";
+import { buildWallet, loadWalletState, saveWalletState, walletStateFile } from "./wallet.mjs";
+const keys = deriveWalletKeys(readSeed()); const f = walletStateFile(keys);
+const wallet = await buildWallet(keys, await loadWalletState(f));
+const t0 = Date.now(); const s = await wallet.waitForSyncedState();
+console.log(`synced in ${((Date.now() - t0) / 1000).toFixed(1)} s · address ${keys.unshieldedKeystore.getBech32Address().asString()}`);
+console.log(`NIGHT (STAR): ${s.unshielded.balances[unshieldedToken().raw] ?? 0n} · DUST (SPECK): ${s.dust.balance(new Date())}`);
+await saveWalletState(wallet, f); await wallet.stop(); process.exit(0);

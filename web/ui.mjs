@@ -53,7 +53,7 @@ $("call").onclick = async () => {
 async function cheat(label, witnesses) {
   const evil = new Contract(witnesses);
   try { const r = await evil.impureCircuits.redeem(sim.ctx("redeem", {}), tag("cheat")); log(`${label}: unexpectedly succeeded`, "bad"); }
-  catch (e) { log(`🛡️ ${label} → rejected by the circuit: <i>${errMsg(e)}</i>`, "ok"); }
+  catch (e) { log(`Blocked: ${label} → rejected by the circuit: <i>${errMsg(e)}</i>`, "ok"); }
 }
 const W = (b, path, i) => ({ localSecret: ({ privateState: p }) => [p, new Uint8Array(32)], bundle: ({ privateState: p }) => [p, b],
   bundlePath: ({ privateState: p }) => [p, path], useIndex: ({ privateState: p }) => [p, i] });
